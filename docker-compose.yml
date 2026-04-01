@@ -1,0 +1,185 @@
+version: '3.9'
+
+services:
+
+  # ── Infrastructură ─────────────────────────────────────────────
+  
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+    volumes: ['redis-data:/data']
+    command: redis-server --appendonly yes
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: rodemo
+      POSTGRES_USER: rodemo
+      POSTGRES_PASSWORD: rodemo-dev
+    ports: ['5432:5432']
+    volumes: ['pg-data:/var/lib/postgresql/data']
+
+  # ── Magistrala ─────────────────────────────────────────────────
+
+  auth-server:
+    build: { context: ., dockerfile: src/magistrala/Dockerfile }
+    command: node src/magistrala/auth-server.js
+    ports: ['4000:4000']
+    environment:
+      PORT: 4000
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  directory:
+    build: { context: ., dockerfile: src/magistrala/Dockerfile }
+    command: node src/magistrala/directory.js
+    ports: ['4001:4001']
+    environment:
+      PORT: 4001
+      AUTH_URL: http://auth-server:4000
+
+  audit-log:
+    build: { context: ., dockerfile: src/magistrala/Dockerfile }
+    command: node src/magistrala/audit-log.js
+    ports: ['4002:4002']
+    environment:
+      PORT: 4002
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+    depends_on: [redis, postgres]
+
+  # ── Instituții ─────────────────────────────────────────────────
+
+  depabd:
+    build: { context: ., dockerfile: src/institutii/Dockerfile }
+    command: node src/institutii/depabd/index.js
+    ports: ['5001:5001']
+    environment:
+      PORT: 5001
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: depabd
+      CLIENT_SECRET: demo-secret-depabd
+    depends_on: [auth-server, redis, postgres]
+
+  anaf:
+    build: { context: ., dockerfile: src/institutii/Dockerfile }
+    command: node src/institutii/anaf/index.js
+    ports: ['5002:5002']
+    environment:
+      PORT: 5002
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: anaf
+      CLIENT_SECRET: demo-secret-anaf
+    depends_on: [auth-server, redis, postgres, depabd]
+
+  cadastru:
+    build: { context: ., dockerfile: src/institutii/Dockerfile }
+    command: node src/institutii/cadastru/index.js
+    ports: ['5003:5003']
+    environment:
+      PORT: 5003
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: cadastru
+      CLIENT_SECRET: demo-secret-cadastru
+    depends_on: [auth-server, redis, postgres, depabd]
+
+  transport-ro:
+    build: { context: ., dockerfile: src/institutii/Dockerfile }
+    command: node src/institutii/transport-ro/index.js
+    ports: ['5004:5004']
+    environment:
+      PORT: 5004
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: transport-ro
+      CLIENT_SECRET: demo-secret-transport
+    depends_on: [auth-server, redis, postgres, depabd]
+
+  kivra:
+    build: { context: ., dockerfile: src/institutii/Dockerfile }
+    command: node src/institutii/kivra/index.js
+    ports: ['5005:5005']
+    environment:
+      PORT: 5005
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: kivra
+      CLIENT_SECRET: demo-secret-kivra
+    depends_on: [auth-server, redis, postgres]
+
+  bankgiro:
+    build: { context: ., dockerfile: src/institutii/Dockerfile }
+    command: node src/institutii/bankgiro/index.js
+    ports: ['5006:5006']
+    environment:
+      PORT: 5006
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://rodemo:rodemo-dev@postgres:5432/rodemo
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: bankgiro
+      CLIENT_SECRET: demo-secret-bankgiro
+    depends_on: [auth-server, redis, postgres]
+
+  # ── Agenți ─────────────────────────────────────────────────────
+
+  agent-alocatie:
+    build: { context: ., dockerfile: src/agenti/Dockerfile }
+    command: node src/agenti/agent-alocatie.js
+    environment:
+      REDIS_URL: redis://redis:6379
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: agent-alocatie
+      CLIENT_SECRET: demo-secret-agent-alocatie
+    depends_on: [auth-server, redis, anaf, bankgiro, kivra]
+
+  agent-utilitati:
+    build: { context: ., dockerfile: src/agenti/Dockerfile }
+    command: node src/agenti/agent-utilitati.js
+    environment:
+      REDIS_URL: redis://redis:6379
+      AUTH_URL: http://auth-server:4000
+      DIRECTORY_URL: http://directory:4001
+      CLIENT_ID: agent-utilitati
+      CLIENT_SECRET: demo-secret-agent-utilitati
+    depends_on: [auth-server, redis, depabd, cadastru]
+
+  # ── Portal și API Gateway ──────────────────────────────────────
+
+  api-gateway:
+    build: { context: ., dockerfile: src/gateway/Dockerfile }
+    command: node src/gateway/index.js
+    ports: ['3001:3001']
+    environment:
+      PORT: 3001
+      DIRECTORY_URL: http://directory:4001
+      AUTH_URL: http://auth-server:4000
+    depends_on: [auth-server, directory]
+
+  portal:
+    build: { context: ., dockerfile: src/portal/Dockerfile }
+    ports: ['3000:3000']
+    environment:
+      API_URL: http://api-gateway:3001
+    depends_on: [api-gateway]
+
+volumes:
+  redis-data:
+  pg-data:
