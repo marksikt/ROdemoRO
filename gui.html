@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROdemoRO — Demo Interactiv</title>
+<style>
+:root{
+  --bg:#f4f3ef;--s:#fff;--s2:#f9f8f5;--b:#e2e0da;--t:#1c1c1a;--m:#6b6963;
+  --g:#1D9E75;--gl:#E1F5EE;--gd:#085041;--a:#BA7517;--al:#FAEEDA;
+  --bl:#185FA5;--bll:#E6F1FB;--p:#534AB7;--pl:#EEEDFE;--pk:#D4537E;--pkl:#FBEAF0;
+  --r:8px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#171715;--s:#1f1f1d;--s2:#252523;--b:#2e2e2b;--t:#e6e4de;--m:#8a8880;
+  --gl:#04342C;--al:#412402;--bll:#042C53;--pl:#26215C;--pkl:#4B1528;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t);display:flex;flex-direction:column}
+
+.hdr{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--s);border-bottom:1px solid var(--b);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:inherit}
+.seal{width:34px;height:34px;border:2.5px solid var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:var(--g);transform:rotate(-8deg);font-family:Georgia,serif;flex-shrink:0;background:var(--gl)}
+.logo-text{font-size:16px;font-weight:600}
+.logo-sub{font-size:10px;color:var(--m)}
+.hdr-motto{margin-left:auto;font-size:11px;color:var(--m);font-style:italic;text-align:right;max-width:300px}
+
+.app{display:flex;flex:1;min-height:0}
+aside{width:230px;flex-shrink:0;border-right:1px solid var(--b);overflow-y:auto;background:var(--s2)}
+.sb-hdr{padding:10px 12px 5px;font-size:10px;font-weight:600;color:var(--m);letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.sb-reset{font-size:10px;color:var(--g);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:500}
+.sb-reset:hover{text-decoration:underline}
+
+.pc{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--b);transition:background .13s}
+.pc:hover{background:var(--gl)}
+.pc.active{background:var(--gl);border-left:3px solid var(--g)}
+.pc-av{font-size:18px;flex-shrink:0;width:22px;text-align:center}
+.pc-name{font-size:12px;font-weight:500;line-height:1.3}
+.pc-info{font-size:10px;color:var(--m)}
+.tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:10px;border:1px solid;font-weight:500;margin-top:2px}
+.tg{background:var(--gl);color:var(--gd);border-color:var(--g)}
+.ta{background:var(--al);color:var(--a);border-color:var(--a)}
+.tb{background:var(--bll);color:var(--bl);border-color:var(--bl)}
+.tp{background:var(--pl);color:var(--p);border-color:var(--p)}
+.tpk{background:var(--pkl);color:var(--pk);border-color:var(--pk)}
+.tx{background:#f0f0f0;color:#777;border-color:#ccc}
+
+main{flex:1;overflow-y:auto;padding:16px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--m);text-align:center}
+.welcome h2{font-size:20px;font-weight:600;color:var(--t)}
+.welcome p{font-size:13px;max-width:360px;line-height:1.6}
+.welcome-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:420px;margin-top:8px}
+.wg{background:var(--s);border:1px solid var(--b);border-radius:var(--r);padding:10px;text-align:center;font-size:11px;color:var(--m)}
+.wg .wi{font-size:20px;display:block;margin-bottom:4px}
+
+.det-hdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--b)}
+.det-av{font-size:38px;line-height:1}
+.det-cnp{font-family:monospace;font-size:13px;font-weight:700;color:var(--g);margin-bottom:2px}
+.det-name{font-size:20px;font-weight:600}
+.det-meta{font-size:11px;color:var(--m);margin-top:3px}
+.det-phone{font-family:monospace;font-size:10px;color:var(--m)}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--s);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;margin-bottom:0}
+.ch{display:flex;align-items:center;gap:6px;padding:7px 11px;border-bottom:1px solid var(--b);background:var(--s2);font-size:11px;font-weight:500}
+.ch .ico{font-size:13px}
+.cb{padding:9px 11px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px;font-size:11px}
+.rl{color:var(--m)}
+.rv{font-weight:500;text-align:right;word-break:break-all}
+.rv.id{font-family:monospace;font-size:10px;background:var(--gl);color:var(--gd);padding:1px 5px;border-radius:4px}
+.rv.money{color:var(--g);font-weight:700}
+.empty{font-size:11px;color:var(--m);font-style:italic}
+
+.agents-lbl{font-size:10px;font-weight:600;color:var(--m);letter-spacing:.08em;text-transform:uppercase;margin:14px 0 8px}
+.agents{display:flex;gap:7px;flex-wrap:wrap}
+.abtn{display:flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid var(--pk);border-radius:var(--r);background:var(--pkl);color:var(--pk);font-size:12px;font-weight:500;cursor:pointer;transition:all .13s;font-family:inherit}
+.abtn:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(212,83,126,.2)}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal{background:var(--s);border-radius:12px;width:100%;max-width:460px;padding:20px;position:relative;max-height:90vh;overflow-y:auto}
+.mc{position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;font-size:18px;color:var(--m);line-height:1}
+.mt{font-size:16px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:7px}
+.msub{font-size:12px;color:var(--m);margin-bottom:12px}
+.tsel{margin-bottom:12px}
+.tsel label{font-size:11px;color:var(--m);display:block;margin-bottom:3px;font-weight:500}
+.tsel select{width:100%;padding:7px 10px;border:1px solid var(--b);border-radius:6px;font-size:12px;background:var(--s2);color:var(--t);outline:none;font-family:inherit}
+.tsel select:focus{border-color:var(--g)}
+.steps{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.step{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--s2);border:1px solid var(--b);font-size:12px;opacity:.4;transition:all .35s}
+.step.active{opacity:1;border-color:var(--a);background:var(--al)}
+.step.done{opacity:1;border-color:var(--g);background:var(--gl)}
+.sico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.ssvc{margin-left:auto;font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--pl);color:var(--p);white-space:nowrap}
+.progbar{height:4px;background:var(--b);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.progbar-fill{height:100%;background:var(--g);border-radius:2px;transition:width .35s}
+.mactions{display:flex;gap:8px}
+.btn1{flex:1;padding:9px;background:var(--g);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity .13s}
+.btn1:disabled{opacity:.5;cursor:default}
+.btn2{padding:9px 16px;background:var(--s2);color:var(--t);border:1px solid var(--b);border-radius:var(--r);font-size:13px;cursor:pointer;font-family:inherit}
+.result{background:var(--gl);border:1.5px solid var(--g);border-radius:var(--r);padding:11px;margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--gd)}
+
+.notif{position:fixed;bottom:16px;right:16px;background:var(--g);color:#fff;padding:10px 16px;border-radius:var(--r);font-size:13px;z-index:200;animation:si .3s ease-out}
+@keyframes si{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a class="logo" href="#">
+    <div class="seal">N</div>
+    <div>
+      <div class="logo-text">ROdemoRO <span style="font-size:11px;color:var(--m);font-weight:400">· NUCLEU</span></div>
+      <div class="logo-sub">Un stat simulat · funcțional · vizitabil · chiar și de pinguini</div>
+    </div>
+  </a>
+  <div class="hdr-motto">„Statul care nu te face să plângi. În sfârșit." · Model Skatteverket</div>
+</header>
+
+<div class="app">
+  <aside>
+    <div class="sb-hdr">Cetățeni <span class="sb-reset" onclick="resetState()">↺ Reset</span></div>
+    <div id="sb"></div>
+  </aside>
+  <main id="main">
+    <div class="welcome" id="welcome">
+      <div style="font-size:48px">🏛️</div>
+      <h2>Bine ai venit la NUCLEU</h2>
+      <p>Selectează o persoană din lista din stânga. Vezi dosarul administrativ complet și interacționează cu agenții. Zero formulare. Zero cozi.</p>
+      <div class="welcome-grid">
+        <div class="wg"><span class="wi">💍</span>Căsătorie</div>
+        <div class="wg"><span class="wi">⚖️</span>Divorț</div>
+        <div class="wg"><span class="wi">👶</span>Naștere</div>
+        <div class="wg"><span class="wi">🏠</span>Vânzare imobil</div>
+        <div class="wg"><span class="wi">🚗</span>Vânzare auto</div>
+        <div class="wg"><span class="wi">🏖️</span>Pensionare</div>
+      </div>
+      <p style="font-size:10px;margin-top:12px;color:var(--m)">github.com/marksikt/ROdemoRO · Inspirat din sistemul suedez</p>
+    </div>
+    <div id="det" style="display:none"></div>
+  </main>
+</div>
+
+<div class="overlay" id="modal" style="display:none">
+  <div class="modal">
+    <button class="mc" onclick="closeModal()">✕</button>
+    <div id="mc"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  DATE
+// ══════════════════════════════════════════════════════════
+const INIT = {
+  andrei:{id:'andrei',e:'🧑',pr:'Andrei',nu:'Ionescu',v:32,
+    cnp:'19920315-003421',dn:'1992-03-15',sex:'M',civil:'necasatorit',mort:false,
+    adr:{w:'verde.deal.apa',p:'Bd. Unirii 45 ap.12, București'},
+    fisc:{st:'salariat',ang:'TechSoft SRL',brut:8500,net:5950},
+    prop:{w:'verde.deal.apa',p:'Bd. Unirii 45 ap.12, București',tip:'apartament',mp:65},
+    car:{pl:'20191203-KPF',ma:'Dacia',mo:'Logan',an:2019,col:'gri'},
+    san:{md:'Dr. Popescu',sg:'A+',al:[],cr:[]},
+    doc:['Contract muncă · TechSoft SRL','CI emisă 2022'],
+    plati:[],sot:null,copii:[]},
+
+  maria:{id:'maria',e:'👩',pr:'Maria',nu:'Constantin',v:28,
+    cnp:'19960622-007812',dn:'1996-06-22',sex:'F',civil:'necasatorit',mort:false,
+    adr:{w:'soare.munte.cer',p:'Str. Eminescu 7, Cluj-Napoca'},
+    fisc:{st:'salariat',ang:'Liceul Teoretic Cluj',brut:5200,net:3640},
+    prop:null,car:null,
+    san:{md:'Dr. Marin',sg:'O+',al:['Penicilină'],cr:[]},
+    doc:['Contract muncă · Liceu','CI emisă 2023'],
+    plati:[],sot:null,copii:[]},
+
+  joan:{id:'joan',e:'👨',pr:'Ioan',nu:'Petrescu',v:56,
+    cnp:'19680530-001373',dn:'1968-05-30',sex:'M',civil:'casatorit',mort:false,
+    adr:{w:'maria.mulge.vaca',p:'Str. Libertății 12, Cluj-Napoca'},
+    fisc:{st:'pensionar',ang:null,brut:0,net:0,pensie:3200},
+    prop:{w:'maria.mulge.vaca',p:'Str. Libertății 12, Cluj-Napoca',tip:'casă',mp:120},
+    car:{pl:'20210815-ARB',ma:'VW',mo:'Golf',an:2021,col:'alb'},
+    san:{md:'Dr. Ionescu',sg:'B+',al:[],cr:['Hipertensiune']},
+    doc:['Decizie pensionare 2023','CI emisă 2021'],
+    plati:[{t:'Pensie lunară',s:3200}],sot:'elena',copii:['anap','mihp']},
+
+  elena:{id:'elena',e:'👩',pr:'Elena',nu:'Petrescu',v:54,
+    cnp:'19700214-002841',dn:'1970-02-14',sex:'F',civil:'casatorit',mort:false,
+    adr:{w:'maria.mulge.vaca',p:'Str. Libertății 12, Cluj-Napoca'},
+    fisc:{st:'salariat',ang:'Spitalul Județean Cluj',brut:12000,net:8400},
+    prop:null,car:null,
+    san:{md:'Dr. Stan',sg:'AB+',al:[],cr:[]},
+    doc:['Contract muncă · Spital','CI emisă 2022'],
+    plati:[],sot:'joan',copii:['anap','mihp']},
+
+  anap:{id:'anap',e:'👧',pr:'Ana',nu:'Petrescu',v:8,minor:true,
+    cnp:'20160308-000541',dn:'2016-03-08',sex:'F',civil:'necasatorit',mort:false,
+    adr:{w:'maria.mulge.vaca',p:'Str. Libertății 12, Cluj-Napoca'},
+    fisc:{st:'minor',ang:null,brut:0,net:0},
+    prop:null,car:null,
+    san:{md:'Dr. Ionescu',sg:'A+',al:[],cr:[]},
+    doc:['Certificat naștere'],
+    plati:[{t:'Alocație copil',s:600}],sot:null,copii:[]},
+
+  mihp:{id:'mihp',e:'👦',pr:'Mihai',nu:'Petrescu',v:5,minor:true,
+    cnp:'20190715-000823',dn:'2019-07-15',sex:'M',civil:'necasatorit',mort:false,
+    adr:{w:'maria.mulge.vaca',p:'Str. Libertății 12, Cluj-Napoca'},
+    fisc:{st:'minor',ang:null,brut:0,net:0},
+    prop:null,car:null,
+    san:{md:'Dr. Ionescu',sg:'O+',al:['Lactoză'],cr:[]},
+    doc:['Certificat naștere'],
+    plati:[{t:'Alocație copil',s:800}],sot:null,copii:[]},
+
+  gheorghe:{id:'gheorghe',e:'👴',pr:'Gheorghe',nu:'Popa',v:79,
+    cnp:'19450822-000445',dn:'1945-08-22',sex:'M',civil:'vaduv',mort:false,
+    adr:{w:'codru.vechi.drum',p:'Calea Victoriei 23 ap.4, București'},
+    fisc:{st:'pensionar',ang:null,brut:0,net:0,pensie:2800},
+    prop:{w:'codru.vechi.drum',p:'Calea Victoriei 23 ap.4, București',tip:'apartament',mp:54},
+    car:null,
+    san:{md:'Dr. Dumitrescu',sg:'O-',al:[],cr:['Diabet','Artrită']},
+    doc:['Decizie pensionare','Certificat deces soție 2018','CI emisă 2020'],
+    plati:[{t:'Pensie lunară',s:2800}],sot:null,copii:[]},
+
+  cristina:{id:'cristina',e:'👩',pr:'Cristina',nu:'Niculescu',v:36,
+    cnp:'19880317-006721',dn:'1988-03-17',sex:'F',civil:'divortat',mort:false,
+    adr:{w:'piatra.alba.vale',p:'Str. Republicii 3 ap.8, Timișoara'},
+    fisc:{st:'antreprenor',ang:'Design Studio SRL',brut:15000,net:10500},
+    prop:{w:'piatra.alba.vale',p:'Str. Republicii 3 ap.8, Timișoara',tip:'apartament',mp:78},
+    car:{pl:'20230901-BPQ',ma:'BMW',mo:'X3',an:2023,col:'negru'},
+    san:{md:'Dr. Pop',sg:'B-',al:['Aspirină'],cr:[]},
+    doc:['Decizie divorț 2021','CI emisă 2023'],
+    plati:[],sot:null,copii:['luca']},
+
+  radu:{id:'radu',e:'🧔',pr:'Radu',nu:'Stan',v:39,
+    cnp:'19850911-004891',dn:'1985-09-11',sex:'M',civil:'divortat',mort:false,
+    adr:{w:'rau.mare.pod',p:'Bd. Decebal 18 ap.6, București'},
+    fisc:{st:'somaj',ang:null,brut:0,net:0,ind:2100},
+    prop:{w:'rau.mare.pod',p:'Bd. Decebal 18 ap.6, București',tip:'apartament',mp:48},
+    car:{pl:'20171205-TKR',ma:'Skoda',mo:'Octavia',an:2017,col:'albastru'},
+    san:{md:'Dr. Vasile',sg:'A-',al:[],cr:[]},
+    doc:['Decizie divorț 2022','Adeverință șomaj','CI emisă 2022'],
+    plati:[{t:'Indemnizație șomaj',s:2100}],sot:null,copii:[]},
+
+  ioana:{id:'ioana',e:'👩',pr:'Ioana',nu:'Stan',v:37,
+    cnp:'19870629-005142',dn:'1987-06-29',sex:'F',civil:'divortat',mort:false,
+    adr:{w:'floare.camp.rau',p:'Str. Avram Iancu 5, București'},
+    fisc:{st:'salariat',ang:'BRD Group',brut:7200,net:5040},
+    prop:null,car:null,
+    san:{md:'Dr. Georgescu',sg:'A+',al:[],cr:[]},
+    doc:['Decizie divorț 2022','Contract muncă · BRD','CI emisă 2023'],
+    plati:[],sot:null,copii:['luca']},
+
+  luca:{id:'luca',e:'👦',pr:'Luca',nu:'Stan',v:6,minor:true,
+    cnp:'20180915-000312',dn:'2018-09-15',sex:'M',civil:'necasatorit',mort:false,
+    adr:{w:'floare.camp.rau',p:'Str. Avram Iancu 5, București'},
+    fisc:{st:'minor',ang:null,brut:0,net:0},
+    prop:null,car:null,
+    san:{md:'Dr. Georgescu',sg:'A+',al:[],cr:[]},
+    doc:['Certificat naștere'],
+    plati:[{t:'Alocație copil (custodie Ioana)',s:700}],sot:null,copii:[]},
+};
+
+let P = JSON.parse(JSON.stringify(INIT));
+let sel = null;
+let mAgent = null;
+let mRunning = false;
+
+function resetState(){P=JSON.parse(JSON.stringify(INIT));sel=null;renderSB();document.getElementById('welcome').style.display='flex';document.getElementById('det').style.display='none';showNotif('Stare resetată la valorile inițiale.');}
+
+// ══════════════════════════════════════════════════════════
+//  AGENȚI
+// ══════════════════════════════════════════════════════════
+const AGENTS = {
+  casatorie:{name:'Agent Căsătorie',ico:'💍',
+    desc:'Actualizează starea civilă, creează legătura de familie și emite certificate digitale în Kivra.',
+    needT:true,tLbl:'Selectați partenerul/partenera',
+    tFlt:(p,cur)=>p.id!==cur.id&&p.civil!=='casatorit'&&!p.mort&&!p.minor,
+    steps:[
+      {t:'Verificare stare civilă DEPABD',s:'DEPABD'},
+      {t:'Actualizare stare civilă → căsătorit',s:'DEPABD'},
+      {t:'Legătură familie înregistrată',s:'DEPABD'},
+      {t:'Status fiscal actualizat ANAF',s:'ANAF'},
+      {t:'Certificate emise în Kivra (×2)',s:'Kivra'},
+    ],
+    apply(pid,tid){
+      P[pid].civil='casatorit';P[pid].sot=tid;
+      P[pid].doc.push('💍 Certificat căsătorie');
+      if(tid){P[tid].civil='casatorit';P[tid].sot=pid;P[tid].doc.push('💍 Certificat căsătorie');}
+    },
+    result(pid,tid){return`${P[pid].pr} și ${tid?P[tid].pr:'partenerul'} sunt acum căsătoriți. Certificate emise în Kivra.`;}
+  },
+
+  divort:{name:'Agent Divorț',ico:'⚖️',
+    desc:'Procesează divorțul, actualizează starea civilă și emite deciziile oficiale în Kivra.',
+    needT:false,
+    steps:[
+      {t:'Verificare căsătorie DEPABD',s:'DEPABD'},
+      {t:'Procesare cerere Instanțe',s:'Instanțe'},
+      {t:'Actualizare stare civilă → divorțat',s:'DEPABD'},
+      {t:'Recalcul drepturi fiscale ANAF',s:'ANAF'},
+      {t:'Decizii emise în Kivra (×2)',s:'Kivra'},
+    ],
+    apply(pid){
+      const tid=P[pid].sot;
+      P[pid].civil='divortat';P[pid].sot=null;P[pid].doc.push('⚖️ Decizie divorț');
+      if(tid&&P[tid]){P[tid].civil='divortat';P[tid].sot=null;P[tid].doc.push('⚖️ Decizie divorț');}
+    },
+    result(pid){return`Divorț procesat. Ambele părți au primit deciziile în Kivra.`;}
+  },
+
+  nastere:{name:'Agent Naștere',ico:'👶',
+    desc:'Înregistrează nașterea, generează CNP nou RO.DEMO.RO și activează AUTOMAT alocația.',
+    needT:false,
+    steps:[
+      {t:'Generare CNP nou RO.DEMO.RO',s:'NUCLEU'},
+      {t:'Înregistrare naștere DEPABD',s:'DEPABD'},
+      {t:'Creare dosar medical',s:'Dosar Medical'},
+      {t:'Activare asigurare CNAS',s:'CNAS'},
+      {t:'Calcul alocație → BankGiro automat',s:'BankGiro'},
+      {t:'Certificat naștere în Kivra',s:'Kivra'},
+    ],
+    apply(pid){
+      const azi=new Date().toISOString().slice(0,10).replace(/-/g,'');
+      const ord=String(Math.floor(Math.random()*9000)+500).padStart(5,'0');
+      const cid='copil_'+Date.now();
+      const prenume=['Alex','Sam','Dana','Cris','Rares','Daria'][Math.floor(Math.random()*6)];
+      const al=P[pid].fisc.net||0;
+      const suma=al<2000?800:al<4000?600:400;
+      P[cid]={id:cid,e:'👶',pr:prenume,nu:P[pid].nu,v:0,minor:true,
+        cnp:azi+'-'+ord+'1',dn:new Date().toISOString().slice(0,10),sex:'M',civil:'necasatorit',mort:false,
+        adr:{...P[pid].adr},fisc:{st:'minor',ang:null,brut:0,net:0},
+        prop:null,car:null,san:{md:'Dr. Pediatru',sg:'?',al:[],cr:[]},
+        doc:['👶 Certificat naștere'],
+        plati:[{t:'Alocație copil',s:suma}],sot:null,copii:[]};
+      P[pid].copii.push(cid);
+      P[pid].doc.push('👶 Certificat naștere '+prenume);
+    },
+    result(pid){return`Copil nou înregistrat! CNP RO.DEMO.RO alocat automat. Alocație activată prin BankGiro.`;}
+  },
+
+  vanzare_imobil:{name:'Agent Vânzare Imobil',ico:'🏠',
+    desc:'Transfer atomic: Cadastru + actualizare adresă + impozit 3% + contracte Kivra.',
+    needT:true,tLbl:'Selectați cumpărătorul',
+    tFlt:(p,cur)=>p.id!==cur.id&&!p.mort&&!p.minor,
+    steps:[
+      {t:'Verificare identități DEPABD',s:'DEPABD'},
+      {t:'Verificare proprietate Cadastru',s:'Cadastru'},
+      {t:'Blocare sumă BankGiro (escrow)',s:'BankGiro'},
+      {t:'Transfer proprietate Cadastru',s:'Cadastru'},
+      {t:'Actualizare adresă cumpărător DEPABD',s:'DEPABD'},
+      {t:'Impozit 3% calculat ANAF',s:'ANAF'},
+      {t:'Contracte emise în Kivra (×2)',s:'Kivra'},
+    ],
+    apply(pid,tid){
+      const prop={...P[pid].prop};
+      const pret=(200000+Math.floor(Math.random()*150000));
+      const tax=Math.round(pret*.03);
+      P[tid].prop=prop;P[tid].adr={w:prop.w,p:prop.p};
+      P[pid].prop=null;
+      P[pid].doc.push(`🏠 Contract vânzare · ${prop.w}`);
+      P[tid].doc.push(`🏠 Contract cumpărare · ${prop.w} · impozit ${tax.toLocaleString('ro-RO')} lei`);
+    },
+    result(pid,tid){return`Imobil transferat${tid?' lui '+P[tid].pr:''}. Adresă actualizată. Impozit 3% calculat automat. Contracte în Kivra.`;}
+  },
+
+  vanzare_auto:{name:'Agent Auto',ico:'🚗',
+    desc:'Transfer vehicul. Placa rămâne pe mașină. Taxă transfer 0.5%.',
+    needT:true,tLbl:'Selectați cumpărătorul',
+    tFlt:(p,cur)=>p.id!==cur.id&&!p.mort&&!p.minor,
+    steps:[
+      {t:'Verificare proprietar Registrul Auto',s:'Transport RO'},
+      {t:'Transfer proprietate → CNP cumpărător',s:'Transport RO'},
+      {t:'Taxă transfer 0.5% calculată ANAF',s:'ANAF'},
+      {t:'Contracte emise în Kivra (×2)',s:'Kivra'},
+    ],
+    apply(pid,tid){
+      const car={...P[pid].car};
+      P[tid].car=car;P[pid].car=null;
+      P[pid].doc.push('🚗 Contract vânzare auto · '+car.pl);
+      P[tid].doc.push('🚗 Contract cumpărare · '+car.ma+' '+car.mo+' ('+car.pl+')');
+    },
+    result(){return'Vehicul transferat. Placa rămâne pe mașină. Taxa 0.5% calculată. Contracte în Kivra.';}
+  },
+
+  pensionare:{name:'Agent Pensionare',ico:'🏖️',
+    desc:'8 pași automatizați. 15 minute față de 3 luni în sistemul actual.',
+    needT:false,
+    steps:[
+      {t:'Verificare stagiu cotizare CNPP',s:'CNPP'},
+      {t:'Calcul pensie estimativă',s:'CNPP'},
+      {t:'Verificare contribuții ANAF',s:'ANAF'},
+      {t:'Activare pensie CNPP',s:'CNPP'},
+      {t:'Programare plată BankGiro lunară',s:'BankGiro'},
+      {t:'Status fiscal actualizat ANAF',s:'ANAF'},
+      {t:'Asigurare pensionar CNAS',s:'CNAS'},
+      {t:'Decizie pensionare emisă Kivra',s:'Kivra'},
+    ],
+    apply(pid){
+      const pensie=Math.max(1500,Math.round(1800+(P[pid].v-60)*180));
+      P[pid].fisc={st:'pensionar',ang:null,brut:0,net:0,pensie};
+      P[pid].plati.push({t:'Pensie lunară',s:pensie});
+      P[pid].doc.push('🏖️ Decizie pensionare · '+pensie.toLocaleString('ro-RO')+' lei/lună');
+    },
+    result(pid){return`Pensionare activată! ${P[pid].pr} primește ${(P[pid].fisc.pensie||0).toLocaleString('ro-RO')} lei/lună. Decizie în Kivra.`;}
+  },
+
+  angajare:{name:'Agent Angajare',ico:'💼',
+    desc:'Înregistrează contractul, actualizează REVISAL, activează asigurarea de sănătate.',
+    needT:false,
+    steps:[
+      {t:'Înregistrare contract muncă REVISAL',s:'ANAF'},
+      {t:'Calcul CAS + CASS + impozit',s:'ANAF'},
+      {t:'Activare asigurare CNAS',s:'CNAS'},
+      {t:'Oprire indemnizație șomaj BankGiro',s:'BankGiro'},
+      {t:'Contract emis în Kivra',s:'Kivra'},
+    ],
+    apply(pid){
+      const angs=['Acme SRL','Nova Tech','Expert Group','Digital Pro','Star Consult'];
+      const ang=angs[Math.floor(Math.random()*angs.length)];
+      const brut=5000+Math.floor(Math.random()*8000);
+      P[pid].fisc={st:'salariat',ang,brut,net:Math.round(brut*.7)};
+      P[pid].plati=P[pid].plati.filter(pl=>pl.t!=='Indemnizație șomaj');
+      P[pid].doc.push('💼 Contract muncă · '+ang);
+    },
+    result(pid){return`${P[pid].pr} angajat la ${P[pid].fisc.ang}. Net: ${(P[pid].fisc.net||0).toLocaleString('ro-RO')} lei/lună. Contract în Kivra.`;}
+  },
+
+  concediere:{name:'Agent Concediere',ico:'📤',
+    desc:'Procesează încetarea contractului și calculează automat eligibilitatea pentru indemnizație.',
+    needT:false,
+    steps:[
+      {t:'Procesare notificare REVISAL',s:'ANAF'},
+      {t:'Verificare stagiu cotizare',s:'ANAF'},
+      {t:'Calcul eligibilitate șomaj',s:'ANAF'},
+      {t:'Activare indemnizație BankGiro',s:'BankGiro'},
+      {t:'Adeverință emisă în Kivra',s:'Kivra'},
+    ],
+    apply(pid){
+      const ind=Math.round((P[pid].fisc.net||3000)*.75);
+      P[pid].fisc={st:'somaj',ang:null,brut:0,net:0,ind};
+      P[pid].plati.push({t:'Indemnizație șomaj',s:ind});
+      P[pid].doc.push('📤 Adeverință concediere · indemnizație '+ind.toLocaleString('ro-RO')+' lei');
+    },
+    result(pid){return`Contract încetat. Indemnizație șomaj: ${(P[pid].fisc.ind||0).toLocaleString('ro-RO')} lei/lună. Adeverință în Kivra.`;}
+  },
+};
+
+// ══════════════════════════════════════════════════════════
+//  LOGICĂ ACȚIUNI DISPONIBILE
+// ══════════════════════════════════════════════════════════
+function getActions(p){
+  if(p.mort||p.minor)return[];
+  const a=[];
+  if(p.civil!=='casatorit')a.push('casatorie');
+  if(p.civil==='casatorit')a.push('divort');
+  if(p.civil==='casatorit')a.push('nastere');
+  if(p.prop)a.push('vanzare_imobil');
+  if(p.car)a.push('vanzare_auto');
+  if(p.fisc.st!=='pensionar'&&p.v>=63)a.push('pensionare');
+  if(p.fisc.st==='salariat')a.push('concediere');
+  if(['somaj','inactiv'].includes(p.fisc.st))a.push('angajare');
+  return a;
+}
+
+// ══════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════
+function stTag(p){
+  if(p.mort)return'<span class="tag tx">💀 Decedat</span>';
+  if(p.minor)return'<span class="tag tb">👶 Minor</span>';
+  const m={salariat:'<span class="tag tg">Salariat</span>',
+    pensionar:'<span class="tag ta">Pensionar</span>',
+    somaj:'<span class="tag tpk">Șomer</span>',
+    antreprenor:'<span class="tag tp">Antreprenor</span>',
+    minor:'<span class="tag tb">Minor</span>'};
+  return m[p.fisc.st]||`<span class="tag">${p.fisc.st}</span>`;
+}
+
+function civTag(p){
+  return{casatorit:'💍 Căsătorit',divortat:'⚖️ Divorțat',
+    necasatorit:'Necăsătorit',vaduv:'🕊️ Văduv'}[p.civil]||p.civil;
+}
+
+function renderSB(){
+  document.getElementById('sb').innerHTML=Object.values(P).map(p=>`
+    <div class="pc${sel===p.id?' active':''}" onclick="selectP('${p.id}')">
+      <span class="pc-av">${p.e}</span>
+      <div>
+        <div class="pc-name">${p.pr} ${p.nu}${p.mort?' 💀':''}</div>
+        <div class="pc-info">${p.v} ani · ${p.adr.w}</div>
+        <div>${stTag(p)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderDet(id){
+  const p=P[id];if(!p)return;
+  const actions=getActions(p);
+
+  const famHTML=(()=>{
+    const m=[];
+    if(p.sot&&P[p.sot])m.push(`<div class="row"><span class="rl">Soț/Soție</span><span class="rv">${P[p.sot].e} ${P[p.sot].pr} ${P[p.sot].nu}</span></div>`);
+    (p.copii||[]).forEach(cid=>{if(P[cid])m.push(`<div class="row"><span class="rl">Copil</span><span class="rv">${P[cid].e} ${P[cid].pr} ${P[cid].nu}</span></div>`);});
+    return m.length?m.join(''):'<span class="empty">Nicio relație înregistrată</span>';
+  })();
+
+  const fiscHTML=(()=>{
+    const f=p.fisc;
+    if(f.st==='pensionar')return`<div class="row"><span class="rl">Status</span>${stTag(p)}</div><div class="row"><span class="rl">Pensie</span><span class="rv money">${(f.pensie||0).toLocaleString('ro-RO')} lei/lună</span></div>`;
+    if(f.st==='somaj')return`<div class="row"><span class="rl">Status</span>${stTag(p)}</div><div class="row"><span class="rl">Indemnizație</span><span class="rv money">${(f.ind||0).toLocaleString('ro-RO')} lei/lună</span></div>`;
+    if(f.st==='minor')return`<div class="row"><span class="rl">Status</span>${stTag(p)}</div>`;
+    return`<div class="row"><span class="rl">Angajator</span><span class="rv">${f.ang||'—'}</span></div><div class="row"><span class="rl">Brut</span><span class="rv">${(f.brut||0).toLocaleString('ro-RO')} lei</span></div><div class="row"><span class="rl">Net</span><span class="rv money">${(f.net||0).toLocaleString('ro-RO')} lei</span></div>`;
+  })();
+
+  document.getElementById('det').innerHTML=`
+    <div class="det-hdr">
+      <div class="det-av">${p.e}</div>
+      <div>
+        <div class="det-name">${p.pr} ${p.nu}${p.mort?' <span style="color:#aaa;font-size:13px">(Decedat)</span>':''}</div>
+        <div class="det-cnp">${p.cnp}</div>
+        <div class="det-phone">📞 +40-${p.cnp}</div>
+        <div class="det-meta">${p.dn} · ${p.v} ani · ${p.sex==='M'?'Masculin':'Feminin'}</div>
+        <div class="tags">${stTag(p)}<span class="tag ta">${civTag(p)}</span>${p.minor?'<span class="tag tb">Minor</span>':''}</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="ch"><span class="ico">📍</span>Adresă</div><div class="cb">
+        <div class="row"><span class="rl">W3W</span><span class="rv id">${p.adr.w}</span></div>
+        <div class="row"><span class="rl">Poștală</span><span class="rv" style="font-size:10px">${p.adr.p}</span></div>
+      </div></div>
+      <div class="card"><div class="ch"><span class="ico">👨‍👩‍👧</span>Familie</div><div class="cb">${famHTML}</div></div>
+      <div class="card"><div class="ch"><span class="ico">💰</span>Fiscal</div><div class="cb">${fiscHTML}</div></div>
+      <div class="card"><div class="ch"><span class="ico">🏠</span>Proprietate</div><div class="cb">
+        ${p.prop?`<div class="row"><span class="rl">Tip</span><span class="rv">${p.prop.tip}</span></div>
+        <div class="row"><span class="rl">W3W</span><span class="rv id">${p.prop.w}</span></div>
+        <div class="row"><span class="rl">Suprafață</span><span class="rv">${p.prop.mp} m²</span></div>`
+        :'<span class="empty">Nicio proprietate înregistrată</span>'}
+      </div></div>
+      <div class="card"><div class="ch"><span class="ico">🚗</span>Vehicul</div><div class="cb">
+        ${p.car?`<div class="row"><span class="rl">Placă</span><span class="rv id">${p.car.pl}</span></div>
+        <div class="row"><span class="rl">Vehicul</span><span class="rv">${p.car.ma} ${p.car.mo} (${p.car.an})</span></div>
+        <div class="row"><span class="rl">Culoare</span><span class="rv">${p.car.col}</span></div>`
+        :'<span class="empty">Niciun vehicul înregistrat</span>'}
+      </div></div>
+      <div class="card"><div class="ch"><span class="ico">🏥</span>Sănătate</div><div class="cb">
+        <div class="row"><span class="rl">Medic</span><span class="rv">${p.san.md}</span></div>
+        <div class="row"><span class="rl">Grupă sânge</span><span class="rv">${p.san.sg}</span></div>
+        ${p.san.al.length?`<div class="row"><span class="rl">Alergii</span><span class="rv">${p.san.al.join(', ')}</span></div>`:''}
+        ${p.san.cr.length?`<div class="row"><span class="rl">Cronice</span><span class="rv">${p.san.cr.join(', ')}</span></div>`:''}
+      </div></div>
+    </div>
+    ${p.plati.length?`<div class="card" style="margin-bottom:8px"><div class="ch"><span class="ico">💳</span>Plăți recurente BankGiro</div><div class="cb">
+      ${p.plati.map(pl=>`<div class="row"><span class="rl">${pl.t}</span><span class="rv money">${pl.s.toLocaleString('ro-RO')} lei/lună</span></div>`).join('')}
+    </div></div>`:''}
+    <div class="card" style="margin-bottom:14px"><div class="ch"><span class="ico">📬</span>Kivra — documente <span style="font-size:9px;color:var(--m);margin-left:auto">${p.doc.length} documente</span></div><div class="cb">
+      ${p.doc.slice(-5).reverse().map(d=>`<div class="row"><span style="font-size:11px">📄 ${d}</span></div>`).join('')}
+    </div></div>
+    ${actions.length?`
+      <div class="agents-lbl">Agenți disponibili</div>
+      <div class="agents">${actions.map(a=>`<button class="abtn" onclick="openAgent('${a}')">${AGENTS[a].ico} ${AGENTS[a].name}</button>`).join('')}</div>
+    `:'<p style="font-size:12px;color:var(--m);font-style:italic">Niciun agent disponibil pentru această persoană.</p>'}
+  `;
+}
+
+function selectP(id){
+  sel=id;renderSB();
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('det').style.display='block';
+  renderDet(id);
+}
+
+// ══════════════════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════════════════
+function openAgent(at){
+  if(!sel)return;
+  mAgent=at;
+  const ag=AGENTS[at];const cur=P[sel];
+  let tSel='';
+  if(ag.needT){
+    const targets=Object.values(P).filter(p=>ag.tFlt(p,cur));
+    if(!targets.length){showNotif('Nicio persoană eligibilă pentru această acțiune.');return;}
+    tSel=`<div class="tsel"><label>${ag.tLbl}</label>
+      <select id="mtarget">${targets.map(t=>`<option value="${t.id}">${t.e} ${t.pr} ${t.nu}</option>`).join('')}</select></div>`;
+  }
+  document.getElementById('mc').innerHTML=`
+    <div class="mt">${ag.ico} ${ag.name}</div>
+    <div class="msub">${cur.pr} ${cur.nu} · ${ag.desc}</div>
+    ${tSel}
+    <div class="steps" id="msteps">${ag.steps.map(s=>`
+      <div class="step"><span class="sico">○</span><span>${s.t}</span><span class="ssvc">${s.s}</span></div>
+    `).join('')}</div>
+    <div class="progbar"><div class="progbar-fill" id="mprog" style="width:0"></div></div>
+    <div class="mactions">
+      <button class="btn2" onclick="closeModal()">Anulează</button>
+      <button class="btn1" id="mrun" onclick="runSim()">▶ Pornește simularea</button>
+    </div>`;
+  document.getElementById('modal').style.display='flex';
+}
+
+async function runSim(){
+  if(mRunning)return;
+  mRunning=true;
+  const btn=document.getElementById('mrun');
+  btn.disabled=true;btn.textContent='Se procesează...';
+  const steps=document.querySelectorAll('.step');
+  const n=steps.length;
+  for(let i=0;i<n;i++){
+    steps[i].classList.add('active');
+    steps[i].querySelector('.sico').textContent='⏳';
+    document.getElementById('mprog').style.width=`${((i+.5)/n)*100}%`;
+    await sleep(550+Math.random()*350);
+    steps[i].classList.remove('active');
+    steps[i].classList.add('done');
+    steps[i].querySelector('.sico').textContent='✅';
+    document.getElementById('mprog').style.width=`${((i+1)/n)*100}%`;
+  }
+  const tid=document.getElementById('mtarget')?.value||null;
+  AGENTS[mAgent].apply(sel,tid);
+  const res=AGENTS[mAgent].result(sel,tid);
+  document.getElementById('mc').innerHTML+=`<div class="result"><strong>✅ Tranzacție finalizată!</strong><br>${res}</div>`;
+  btn.textContent='Închide';btn.disabled=false;btn.onclick=closeModal;
+  mRunning=false;
+}
+
+function closeModal(){
+  if(mRunning)return;
+  document.getElementById('modal').style.display='none';
+  mAgent=null;renderSB();if(sel)renderDet(sel);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function showNotif(txt){
+  const n=document.createElement('div');n.className='notif';n.textContent=txt;
+  document.body.appendChild(n);setTimeout(()=>n.remove(),3000);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+renderSB();
+</script>
+</body>
+</html>
