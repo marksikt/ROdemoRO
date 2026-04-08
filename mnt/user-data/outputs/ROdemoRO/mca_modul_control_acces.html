@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCA — Modulul de Control al Accesului · ROdemoRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0e0e0c;
+  --surface:  #161614;
+  --border:   #252520;
+  --border2:  #2e2e28;
+  --text:     #e8e5dc;
+  --muted:    #6b6860;
+  --permit:   #2d6a3f;
+  --permit-t: #4ade80;
+  --deny:     #6b1a1a;
+  --deny-t:   #f87171;
+  --cond:     #5c3d0a;
+  --cond-t:   #fbbf24;
+  --indet:    #2a2a2a;
+  --indet-t:  #6b6860;
+  --accent:   #7f77dd;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ─── HEADER ─── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 28px 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+.header-title {
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: .03em;
+}
+.header-title strong { font-weight: 500; color: var(--accent); }
+.header-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.header-badge {
+  margin-left: auto;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 3px 8px;
+}
+
+/* ─── MAIN LAYOUT ─── */
+.main {
+  display: grid;
+  grid-template-columns: 220px 1fr 280px;
+  gap: 0;
+  height: calc(100vh - 57px);
+}
+.col {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 18px;
+}
+.col:last-child { border-right: none; }
+
+/* ─── SECTION LABELS ─── */
+.lbl {
+  font-family: 'Space Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─── INSTITUTION SELECTOR ─── */
+.inst-item {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 5px;
+  margin-bottom: 3px;
+  border: 1px solid transparent;
+  transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.inst-item:hover { background: var(--surface); border-color: var(--border); }
+.inst-item.active { background: #1e1d2e; border-color: var(--accent); }
+.inst-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+.inst-role {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.inst-domain {
+  font-size: 10px;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* ─── MIDDLE: SIMULATOR ─── */
+.sim-resource-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.res-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  color: var(--text);
+  font-family: inherit;
+}
+.res-btn:hover { border-color: var(--border2); background: #1a1a18; }
+.res-btn.active { border-color: var(--accent); background: #1e1d2e; }
+.res-name {
+  font-size: 12px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 2px;
+}
+.res-owner {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+/* ─── DECISION PANEL ─── */
+.decision-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.decision-header {
+  padding: 10px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.decision-body {
+  padding: 14px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* request flow */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  flex-wrap: wrap;
+}
+.flow-node {
+  padding: 4px 9px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  color: var(--text);
+  white-space: nowrap;
+}
+.flow-arrow {
+  color: var(--muted);
+  font-size: 12px;
+}
+.flow-node.caller { border-color: #534AB7; color: #AFA9EC; background: #1e1d2e; }
+.flow-node.resource { border-color: #1D9E75; color: #5DCAA5; background: #04342C; }
+.flow-node.pep { border-color: var(--border2); color: var(--muted); }
+.flow-node.pdp { border-color: var(--border2); color: var(--muted); }
+
+/* verdict */
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all .3s ease;
+}
+.verdict.visible { opacity: 1; transform: translateY(0); }
+.verdict.permit { background: var(--permit); border: 1px solid var(--permit-t); }
+.verdict.deny { background: var(--deny); border: 1px solid var(--deny-t); }
+.verdict.conditional { background: var(--cond); border: 1px solid var(--cond-t); }
+.verdict.indeterminate { background: var(--indet); border: 1px solid #333; }
+
+.verdict-icon { font-size: 22px; flex-shrink: 0; }
+.verdict-text { flex: 1; }
+.verdict-decision {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  margin-bottom: 2px;
+}
+.verdict.permit .verdict-decision { color: var(--permit-t); }
+.verdict.deny .verdict-decision { color: var(--deny-t); }
+.verdict.conditional .verdict-decision { color: var(--cond-t); }
+.verdict-reason {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text);
+  opacity: .85;
+  line-height: 1.4;
+}
+
+/* rules list */
+.rules-list { display: flex; flex-direction: column; gap: 5px; }
+.rule-item {
+  padding: 7px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-left: 2px solid;
+  background: var(--surface);
+}
+.rule-item.r-permit { border-color: var(--permit-t); }
+.rule-item.r-deny { border-color: var(--deny-t); }
+.rule-item.r-cond { border-color: var(--cond-t); }
+.rule-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+.rule-item.r-permit .rule-tag { color: var(--permit-t); }
+.rule-item.r-deny .rule-tag { color: var(--deny-t); }
+.rule-item.r-cond .rule-tag { color: var(--cond-t); }
+.rule-text { color: var(--text); opacity: .8; line-height: 1.4; }
+
+/* scope badge */
+.scope-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.scope-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--cond-t);
+  color: var(--cond-t);
+  background: rgba(251,191,36,.08);
+}
+
+/* placeholder */
+.placeholder {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  padding: 30px 20px;
+  opacity: .6;
+}
+
+/* ─── MATRIX ─── */
+.matrix-wrap {
+  overflow-x: auto;
+  margin-bottom: 18px;
+}
+table.matrix {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 10px;
+}
+table.matrix th, table.matrix td {
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  text-align: center;
+  white-space: nowrap;
+}
+table.matrix th {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: .06em;
+  background: var(--surface);
+}
+table.matrix th.row-header { text-align: left; min-width: 110px; }
+table.matrix td.row-name {
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  background: var(--surface);
+}
+.mc { font-size: 13px; cursor: pointer; transition: transform .1s; display: inline-block; }
+.mc:hover { transform: scale(1.3); }
+
+/* ─── AUDIT LOG ─── */
+.audit-feed { display: flex; flex-direction: column; gap: 5px; }
+.audit-entry {
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  animation: slideIn .3s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.audit-entry.a-permit { border-left: 2px solid var(--permit-t); }
+.audit-entry.a-deny { border-left: 2px solid var(--deny-t); }
+.audit-entry.a-conditional { border-left: 2px solid var(--cond-t); }
+.audit-ts {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.audit-desc {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.audit-dec {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  margin-top: 2px;
+}
+.a-permit .audit-dec { color: var(--permit-t); }
+.a-deny .audit-dec { color: var(--deny-t); }
+.a-conditional .audit-dec { color: var(--cond-t); }
+
+.pulse {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--permit-t);
+  animation: pulse 2s ease-in-out infinite;
+  margin-right: 6px;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ─── DOMAIN LEGEND ─── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hint {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--muted);
+  text-align: center;
+  padding: 8px;
+}
+
+.xroad-note {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 10px;
+  margin-top: 10px;
+  line-height: 1.7;
+}
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-title">ROdemoRO · <strong>MCA</strong> — Modulul de Control al Accesului</div>
+    <div class="header-sub">Magistrala X-Road RO · Policy Engine · Sekretessdomän · OSL/Patientdatalagen</div>
+  </div>
+  <div class="header-badge">PEP → PDP → DECIZIE</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- COL 1: INSTITUȚIE SOLICITANTĂ -->
+  <div class="col">
+    <div class="lbl">① Instituție solicitantă (caller)</div>
+    <div id="inst-list"></div>
+    <div class="xroad-note">
+      X-Road: deny-all by default<br>
+      Fiecare instituție deține<br>
+      propriul Security Server.<br>
+      Accesul se acordă explicit,<br>
+      nu implicit prin conectare.
+    </div>
+  </div>
+
+  <!-- COL 2: SIMULATOR PDP -->
+  <div class="col">
+    <div class="lbl">② Resursă solicitată</div>
+    <div class="sim-resource-grid" id="res-grid"></div>
+
+    <div class="lbl">③ Decizie PDP (Policy Decision Point)</div>
+    <div class="decision-panel">
+      <div class="decision-header">
+        <span class="pulse" id="pulse-dot"></span>
+        <span>flux cerere · magistrală ro</span>
+      </div>
+      <div class="decision-body" id="decision-body">
+        <div class="placeholder">Selectează o instituție și o resursă<br>pentru a simula cererea prin PDP</div>
+      </div>
+    </div>
+
+    <div class="lbl">Matrice acces — privire de ansamblu</div>
+    <div class="matrix-wrap">
+      <table class="matrix" id="matrix-table"></table>
+    </div>
+    <div class="legend" id="matrix-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--permit-t)"></div>PERMIS</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--deny-t)"></div>INTERZIS</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--cond-t)"></div>CONDIȚIONAT</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--muted)"></div>N/A</div>
+    </div>
+    <div class="hint">Click pe celulele matricei pentru detalii</div>
+  </div>
+
+  <!-- COL 3: AUDIT LOG -->
+  <div class="col">
+    <div class="lbl">④ Audit log · append-only · SHA-256</div>
+    <div class="audit-feed" id="audit-feed">
+      <div style="color:var(--muted);font-style:italic;font-size:12px;text-align:center;padding:20px 0;opacity:.5">
+        Nicio cerere înregistrată<br>în această sesiune
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATE
+// ─────────────────────────────────────────────
+
+const INSTITUTII = [
+  { id:'politie',  name:'Poliție',       role:'CI · Pașapoarte · Date penale', domain:'sekretessdomän: ordine publică' },
+  { id:'anaf',     name:'ANAF',          role:'Fiscal · Venituri · CAS/CASS',  domain:'sekretessdomän: fiscal' },
+  { id:'cnas',     name:'CNAS',          role:'Sănătate · Concedii medicale',  domain:'sekretessdomän: asigurări' },
+  { id:'cnpp',     name:'CNPP',          role:'Pensii · Stagiu cotizare',      domain:'sekretessdomän: pensii' },
+  { id:'cadastru', name:'Cadastru',      role:'Imobile · W3W · Proprietăți',  domain:'sekretessdomän: proprietăți' },
+  { id:'transport',name:'Transport RO',  role:'Permise · Registru Auto',       domain:'sekretessdomän: transport' },
+  { id:'rsn',      name:'RSN',           role:'Registrul Școlar · Diplome',    domain:'sekretessdomän: educație' },
+  { id:'depabd',   name:'DEPABD+',       role:'Populație · Stare Civilă',      domain:'sekretessdomän: populație' },
+  { id:'bankgiro', name:'BankGiro RO',   role:'Plăți · Rutare CNP',            domain:'sekretessdomän: plăți' },
+  { id:'med_a',    name:'Dosar Med. (A)',role:'Furnizor sănătate — clinică A', domain:'sekretessdomän: sănătate · inre sekretess' },
+  { id:'banca',    name:'Bănci RO',      role:'Conturi · Ipoteci · Scoring',   domain:'sekretessdomän: financiar' },
+  { id:'agent',    name:'Agent Automat', role:'Situații viață · supervizat',   domain:'mandat automat · token limitat' },
+];
+
+const RESURSE = [
+  { id:'dosar_medical',      name:'Dosar Medical',       owner:'Furnizor sănătate', icon:'🏥' },
+  { id:'jurnal_clinic',      name:'Jurnal Clinic',       owner:'Clinică (inre sek.)', icon:'📋' },
+  { id:'certificat_concediu',name:'Certificat Concediu', owner:'CNAS ← Clinică',    icon:'📄' },
+  { id:'date_fiscale',       name:'Date Fiscale',        owner:'ANAF',               icon:'💰' },
+  { id:'date_identitate',    name:'Date Identitate',     owner:'DEPABD+',            icon:'🪪' },
+  { id:'identitate_protejata',name:'Identitate Protejată',owner:'DEPABD+ (mascată)', icon:'🛡️' },
+  { id:'stagiu_cotizare',    name:'Stagiu Cotizare',     owner:'CNPP ← ANAF',        icon:'📊' },
+  { id:'date_penale',        name:'Date Penale',         owner:'Poliție',            icon:'⚖️' },
+  { id:'proprietati',        name:'Proprietăți',         owner:'Cadastru',           icon:'🏠' },
+  { id:'date_scolare',       name:'Date Școlare',        owner:'RSN',                icon:'🎓' },
+];
+
+// ─────────────────────────────────────────────
+// POLITICI PDP
+// ─────────────────────────────────────────────
+// verdict: 'permit' | 'deny' | 'conditional' | 'na'
+// rules: array of { type:'permit'|'deny'|'cond', text }
+// scopes: array of strings (pentru conditional)
+// reason: string scurt pentru verdict
+
+const POLITICI = {
+  // ──── POLIȚIE ────
+  'politie:dosar_medical': {
+    verdict:'deny',
+    reason:'Patientdatalagen — acces interzis fără mandat judecătoresc. Domenii de secretizare incompatibile.',
+    rules:[
+      { type:'deny', text:'Poliția aparține sekretessdomänului "ordine publică", incompatibil cu sănătatea.' },
+      { type:'deny', text:'Patientdatalagen §4:1 — accesul aparține exclusiv profesioniștilor din îngrijire directă.' },
+      { type:'deny', text:'Nu există überföring av sekretess (transfer de secret) definit între Poliție și sănătate.' },
+    ]
+  },
+  'politie:jurnal_clinic': {
+    verdict:'deny',
+    reason:'Jurnal clinic — inre sekretess absolut. Inaccessibil chiar și cu mandat, fără instanță superioară.',
+    rules:[
+      { type:'deny', text:'Inre sekretess: jurnalul clinic este protejat chiar față de alți medici din aceeași clinică.' },
+      { type:'deny', text:'Poliția nu are nicio cale legală directă de acces la jurnalul clinic.' },
+    ]
+  },
+  'politie:certificat_concediu': {
+    verdict:'deny',
+    reason:'Certificatul de concediu conține cod ICD-10 — date medicale. Blocat.',
+    rules:[
+      { type:'deny', text:'Chiar dacă e un certificat, conține diagnostic medical (ICD-10) — date sensibile categorie specială GDPR.' },
+    ]
+  },
+  'politie:date_fiscale': {
+    verdict:'conditional',
+    reason:'Acces posibil exclusiv cu token de mandat judecătoresc, cu expirare și scope limitat.',
+    scopes:['token_mandat_judecatoresc','scope=investigatie_penala','audit_log_obligatoriu','expirare_72h'],
+    rules:[
+      { type:'deny', text:'Secretul fiscal (OSL cap. 27) blochează accesul implicit al Poliției la ANAF.' },
+      { type:'cond', text:'Excepție: mandat judecătoresc emite un token special cu durată limitată și scope predefinit.' },
+      { type:'cond', text:'Toate accesările cu token de mandat sunt logate în Audit Log append-only.' },
+    ]
+  },
+  'politie:date_identitate': {
+    verdict:'permit',
+    reason:'DEPABD+ furnizează date de identitate de bază Poliției pentru emiterea CI/Pașaport.',
+    rules:[
+      { type:'permit', text:'Poliția are drept de acces la CNP, nume, stare civilă din DEPABD+ pentru emiterea documentelor.' },
+    ]
+  },
+  'politie:identitate_protejata': {
+    verdict:'conditional',
+    reason:'Identitate protejată (skyddad folkbokföring) — acces operațional strict, logat separat.',
+    scopes:['rol=ofițer_protecție','aprobare_supervizor','log_separat_criptat'],
+    rules:[
+      { type:'deny', text:'Adresa și identitatea protejată sunt mascate față de interogările standard.' },
+      { type:'cond', text:'Ofițerul de protecție a martorilor poate accesa cu aprobare supervizor și log separat criptat.' },
+    ]
+  },
+  'politie:date_penale': {
+    verdict:'permit',
+    reason:'Date penale — proprietarul registrului. Acces complet, logat.',
+    rules:[
+      { type:'permit', text:'Poliția este titularul registrului penal. Acces complet la datele proprii.' },
+    ]
+  },
+  'politie:proprietati': {
+    verdict:'conditional',
+    reason:'Acces la Cadastru posibil în contextul anchetelor, cu mandat sau cerere formală.',
+    scopes:['cerere_formala_sau_mandat','scope=sechestru_sau_ancheta'],
+    rules:[
+      { type:'cond', text:'Cadastrul poate furniza date de proprietate la cerere formală sau mandat în anchete penale.' },
+    ]
+  },
+  'politie:stagiu_cotizare': { verdict:'na', reason:'N/A — date CNPP fără relevanță operațională pentru Poliție.', rules:[] },
+  'politie:date_scolare': { verdict:'na', reason:'N/A — RSN nu furnizează Poliției fără mandat specific.', rules:[{ type:'deny', text:'Date școlare nu se transmit Poliției fără mandat judecătoresc specific.' }] },
+
+  // ──── ANAF ────
+  'anaf:dosar_medical': {
+    verdict:'deny',
+    reason:'ANAF nu poate accesa dosarul medical sub nicio formă. Domenii complet separate.',
+    rules:[
+      { type:'deny', text:'Domeniu fiscal și sănătate — sekretessdomäner incompatibile fără lege expresă.' },
+      { type:'deny', text:'ANAF nu are nicio bază legală pentru accesul la date medicale individuale.' },
+    ]
+  },
+  'anaf:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut — inre sekretess + domenii incompatibile.', rules:[{ type:'deny', text:'Idem dosar medical + inre sekretess.' }] },
+  'anaf:certificat_concediu': {
+    verdict:'conditional',
+    reason:'ANAF primește doar confirmare booleană "concediu_activ" de la CNAS, nu diagnosticul.',
+    scopes:['scope=boolean_concediu_activ','fara_cod_diagnostic','furnizor=CNAS_nu_clinica'],
+    rules:[
+      { type:'deny', text:'ANAF nu accesează direct certificatul medical care conține ICD-10.' },
+      { type:'cond', text:'CNAS furnizează ANAF un flag boolean: concediu_activ=true/false, fără diagnostic.' },
+    ]
+  },
+  'anaf:date_fiscale': { verdict:'permit', reason:'Proprietarul datelor fiscale. Acces complet intern.', rules:[{ type:'permit', text:'ANAF este titularul registrului fiscal. Acces complet la datele proprii.' }] },
+  'anaf:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date de bază pentru corelarea CNP-fiscal.', rules:[{ type:'permit', text:'ANAF are drept de acces la date de identitate pentru corelarea obligațiilor fiscale.' }] },
+  'anaf:identitate_protejata': {
+    verdict:'conditional',
+    reason:'Identitate protejată — ANAF primește date fiscale anonimizate, nu adresa.',
+    scopes:['date_fiscale_fara_adresa','procedura_speciala_TP'],
+    rules:[
+      { type:'cond', text:'Persoanele cu identitate protejată au date fiscale procesate fără asocierea adresei reale.' },
+    ]
+  },
+  'anaf:stagiu_cotizare': { verdict:'permit', reason:'ANAF furnizează stagiul de cotizare CNPP și primește confirmări.', rules:[{ type:'permit', text:'Flux bidirecțional ANAF ↔ CNPP pentru contribuții lunare.' }] },
+  'anaf:date_penale': { verdict:'na', reason:'N/A — ANAF nu accesează registrul penal.', rules:[] },
+  'anaf:proprietati': { verdict:'permit', reason:'Cadastrul notifică ANAF la transferuri imobiliare pentru impozitare.', rules:[{ type:'permit', text:'Transfer imobil → eveniment pe magistrală → ANAF calculează impozit automat.' }] },
+  'anaf:date_scolare': { verdict:'na', reason:'N/A — date școlare nu sunt relevante fiscal.', rules:[] },
+
+  // ──── CNAS ────
+  'cnas:dosar_medical': {
+    verdict:'conditional',
+    reason:'CNAS primește certificate de concediu cu ICD-10, dar NU jurnalul clinic complet.',
+    scopes:['scope=certificat_concediu_cu_ICD10','fara_jurnal_clinic','fara_anamneza','audit_acces'],
+    rules:[
+      { type:'deny', text:'Jurnalul clinic complet rămâne inaccesibil CNAS (inre sekretess).' },
+      { type:'cond', text:'Clinica trimite CNAS certificat de concediu medical cu cod diagnostic ICD-10 pentru decontare.' },
+      { type:'cond', text:'CNAS nu poate interoga activ dosarul — primește push de la furnizorul de sănătate.' },
+    ]
+  },
+  'cnas:jurnal_clinic': { verdict:'deny', reason:'Inre sekretess — jurnalul clinic nu se transmite CNAS.', rules:[{ type:'deny', text:'Inre sekretess absolut pentru jurnalul clinic față de orice instituție nonclinică.' }] },
+  'cnas:certificat_concediu': { verdict:'permit', reason:'CNAS este destinatarul certificatelor de concediu medical.', rules:[{ type:'permit', text:'Flux normal: clinică → CNAS certificat concediu pentru aprobare și decontare.' }] },
+  'cnas:date_fiscale': { verdict:'conditional', reason:'CNAS primește de la ANAF confirmarea calității de asigurat, nu venitul detaliat.', scopes:['scope=calitate_asigurat','fara_venituri_detaliate'], rules:[{ type:'cond', text:'ANAF confirmă CNAS: asigurat_activ=true/false, fără detalierea veniturilor.' }] },
+  'cnas:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date de identitate pentru înscrierea în asigurări.', rules:[{ type:'permit', text:'CNAS are acces la date de identitate pentru gestionarea asigurărilor.' }] },
+  'cnas:identitate_protejata': { verdict:'conditional', reason:'Persoane cu identitate protejată — asigurare gestionată fără asocierea adresei.', scopes:['fara_adresa_reala'], rules:[{ type:'cond', text:'Asigurarea se gestionează prin CNP fără expunerea adresei protejate.' }] },
+  'cnas:stagiu_cotizare': { verdict:'permit', reason:'CNAS verifică stagiul CNPP pentru eligibilitatea concediilor.', rules:[{ type:'permit', text:'Flux CNAS ↔ CNPP pentru verificarea stagiului de cotizare.' }] },
+  'cnas:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'cnas:proprietati': { verdict:'na', reason:'N/A', rules:[] },
+  'cnas:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── CNPP ────
+  'cnpp:dosar_medical': { verdict:'deny', reason:'CNPP nu accesează dosarul medical. Primește doar confirmare eligibilitate asigurare.', rules:[{ type:'deny', text:'CNPP nu are bază legală pentru accesul la date medicale.' }, { type:'cond', text:'CNAS confirmă CNPP: asigurare_pensionar=activata, fără date medicale.' }] },
+  'cnpp:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+  'cnpp:date_fiscale': { verdict:'permit', reason:'ANAF furnizează CNPP contribuțiile lunare CAS pentru calculul stagiului.', rules:[{ type:'permit', text:'Flux lunar ANAF → CNPP: contribuții CAS per CNP pentru actualizarea stagiului.' }] },
+  'cnpp:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date de identitate pentru dosarul de pensie.', rules:[{ type:'permit', text:'CNPP are acces la date identitate pentru deschiderea și gestionarea dosarului de pensie.' }] },
+  'cnpp:identitate_protejata': { verdict:'conditional', reason:'Pensii pentru persoane cu identitate protejată — plată prin BankGiro fără adresă.', scopes:['plata_prin_bankgiro_fara_adresa'], rules:[{ type:'cond', text:'BankGiro asigură plata pensiei prin CNP fără a expune adresa protejată.' }] },
+  'cnpp:stagiu_cotizare': { verdict:'permit', reason:'Proprietarul registrului stagiului de cotizare.', rules:[{ type:'permit', text:'CNPP este titularul stagiului de cotizare. Acces complet intern.' }] },
+  'cnpp:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'cnpp:proprietati': { verdict:'na', reason:'N/A', rules:[] },
+  'cnpp:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+  'cnpp:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut.', rules:[{ type:'deny', text:'Inre sekretess + domenii incompatibile.' }] },
+
+  // ──── RSN ────
+  'rsn:dosar_medical': { verdict:'deny', reason:'RSN nu accesează dosarul medical. Primește scutiri medicale fără diagnostic.', rules:[{ type:'deny', text:'Domeniu educație și sănătate — incompatibile.' }, { type:'cond', text:'Medicul emite scutire "fără diagnostic" — RSN primește doar durata scutirii.' }] },
+  'rsn:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut.', rules:[{ type:'deny', text:'Inre sekretess absolut.' }] },
+  'rsn:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+  'rsn:date_fiscale': { verdict:'conditional', reason:'RSN primește de la ANAF venitul familiei pentru calculul bursei (anonimizat per familie).', scopes:['scope=venit_familie_bursa','fara_detalii_individuale'], rules:[{ type:'cond', text:'Agent Bursă intermediază: RSN solicită verificare venit → ANAF returnează categorie venit, nu suma exactă.' }] },
+  'rsn:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date de identitate pentru înscrierea elevilor.', rules:[{ type:'permit', text:'RSN are acces la date de identitate pentru gestionarea dosarelor școlare.' }] },
+  'rsn:identitate_protejata': { verdict:'conditional', reason:'Elevi cu identitate protejată — adresa școlii mascată în registrul public.', scopes:['adresa_scolii_mascata','acces_intern_rsn_cu_log'], rules:[{ type:'cond', text:'RSN gestionează intern dosarul fără expunerea adresei; în export public adresa e mascată.' }] },
+  'rsn:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+  'rsn:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'rsn:proprietati': { verdict:'na', reason:'N/A', rules:[] },
+  'rsn:date_scolare': { verdict:'permit', reason:'Proprietarul registrului școlar.', rules:[{ type:'permit', text:'RSN este titularul datelor școlare. Acces complet intern.' }] },
+
+  // ──── TRANSPORT ────
+  'transport:dosar_medical': { verdict:'deny', reason:'Transport RO nu accesează dosarul medical. Aptitudinea auto vine separat.', rules:[{ type:'deny', text:'Domenii incompatibile — sekretessdomän transport vs sănătate.' }, { type:'cond', text:'Excepție: medicul emite atestat aptitudine auto separat, fără diagnostic, la cererea conducătorului.' }] },
+  'transport:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut.', rules:[{ type:'deny', text:'Inre sekretess.' }] },
+  'transport:date_fiscale': { verdict:'na', reason:'N/A', rules:[] },
+  'transport:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date identitate pentru emiterea permisului.', rules:[{ type:'permit', text:'Transport RO verifică identitatea în DEPABD+ la emiterea/reînnoirea permisului.' }] },
+  'transport:identitate_protejata': { verdict:'conditional', reason:'Permis emis fără adresă (permisul nu conține adresă, indiferent de statut).', scopes:['permis_fara_adresa_by_design'], rules:[{ type:'permit', text:'Permisul de conducere nu conține adresă prin design — protecția e implicită.' }] },
+  'transport:date_penale': { verdict:'na', reason:'N/A — suspendarea permisului vine printr-un flux separat Poliție → Transport.', rules:[{ type:'cond', text:'Poliția notifică Transport RO despre suspendare; Transport nu citește registrul penal direct.' }] },
+  'transport:proprietati': { verdict:'na', reason:'N/A', rules:[] },
+  'transport:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+  'transport:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+  'transport:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── DEPABD ────
+  'depabd:dosar_medical': { verdict:'conditional', reason:'DEPABD+ notifică nașterea/decesul → Dosar Medical creat/închis automat.', scopes:['scope=nastere_sau_deces','push_event_magistrala','fara_acces_dosar_complet'], rules:[{ type:'cond', text:'La naștere: DEPABD emite eveniment → Dosar Medical nou creat automat cu CNP.' }, { type:'cond', text:'La deces: DEPABD emite eveniment → Dosar Medical marcat "închis". DEPABD nu citește dosarul.' }] },
+  'depabd:jurnal_clinic': { verdict:'deny', reason:'DEPABD+ nu accesează niciodată jurnalul clinic.', rules:[{ type:'deny', text:'Inre sekretess + domenii incompatibile.' }] },
+  'depabd:date_fiscale': { verdict:'na', reason:'N/A — DEPABD furnizează, nu consumă date fiscale.', rules:[] },
+  'depabd:date_identitate': { verdict:'permit', reason:'Proprietarul registrului de identitate. Sursă primară.', rules:[{ type:'permit', text:'DEPABD+ este titularul tuturor datelor de identitate și stare civilă.' }] },
+  'depabd:identitate_protejata': { verdict:'permit', reason:'DEPABD+ gestionează sistemul de identitate protejată (skyddad folkbokföring).', rules:[{ type:'permit', text:'DEPABD+ este proprietarul sistemului de protecție — poate acorda și revoca protecția.' }] },
+  'depabd:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+  'depabd:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'depabd:proprietati': { verdict:'conditional', reason:'La transfer imobil: agentul imobiliar actualizează adresa în DEPABD+ via Cadastru.', scopes:['scope=actualizare_adresa','declansator=agent_imobiliar'], rules:[{ type:'cond', text:'Cadastru notifică DEPABD+ la transfer proprietate pentru actualizarea adresei.' }] },
+  'depabd:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+  'depabd:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── BANKGIRO ────
+  'bankgiro:dosar_medical': { verdict:'na', reason:'N/A', rules:[] },
+  'bankgiro:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut.', rules:[{ type:'deny', text:'Inre sekretess.' }] },
+  'bankgiro:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+  'bankgiro:date_fiscale': { verdict:'na', reason:'N/A', rules:[] },
+  'bankgiro:date_identitate': { verdict:'permit', reason:'BankGiro verifică CNP în DEPABD+ pentru rutarea plăților.', rules:[{ type:'permit', text:'BankGiro verifică existența CNP și banca asociată — nu alte date de identitate.' }] },
+  'bankgiro:identitate_protejata': { verdict:'conditional', reason:'Plățile ajung la CNP, nu la adresă — protecția e implicită prin design.', scopes:['rutare_prin_cnp_fara_adresa'], rules:[{ type:'permit', text:'BankGiro rutează prin CNP → banca destinatarului, fără a cunoaște adresa beneficiarului.' }] },
+  'bankgiro:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+  'bankgiro:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'bankgiro:proprietati': { verdict:'na', reason:'N/A', rules:[] },
+  'bankgiro:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── MED_A ────
+  'med_a:dosar_medical': { verdict:'conditional', reason:'Clinica A poate vizualiza dosarul unui pacient de la Clinica B doar cu consimțământ eID activ.', scopes:['consimtamant_eid_activ','scope=readonly','audit_log_obligatoriu','expirare_sesiune_8h'], rules:[{ type:'deny', text:'Fără consimțământ activ, clinica A nu poate accesa dosarul de la clinica B (inre sekretess între furnizori).' }, { type:'cond', text:'Pacientul acordă consimțământ explicit prin eID → token temporar 8h read-only.' }, { type:'cond', text:'Fiecare acces este logat în Audit Log cu ID-ul clinicii, al medicului și timestamp SHA-256.' }] },
+  'med_a:jurnal_clinic': { verdict:'deny', reason:'Jurnalul clinic al clinicii B este inaccesibil clinicii A — inre sekretess strict.', rules:[{ type:'deny', text:'Inre sekretess: jurnalul clinic aparține strict furnizorului care l-a creat.' }, { type:'cond', text:'Rezumat de transfer poate fi emis de clinica B la cererea pacientului, nu acces direct.' }] },
+  'med_a:certificat_concediu': { verdict:'permit', reason:'Furnizorul de sănătate poate emite certificate de concediu pentru pacienții proprii.', rules:[{ type:'permit', text:'Clinica A emite certificat de concediu pentru pacienții aflați în îngrijire directă.' }] },
+  'med_a:date_fiscale': { verdict:'na', reason:'N/A', rules:[] },
+  'med_a:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date de identitate la internare.', rules:[{ type:'permit', text:'Furnizorii de sănătate verifică CNP în DEPABD+ pentru deschiderea episodului de îngrijire.' }] },
+  'med_a:identitate_protejata': { verdict:'conditional', reason:'Pacienți cu identitate protejată — tratament normal, adresa nu se înregistrează.', scopes:['fara_adresa_in_dosar','cnp_ca_identificator'], rules:[{ type:'cond', text:'Dosarul medical se deschide pe CNP, fără adresa fizică — protecția e transparentă medical.' }] },
+  'med_a:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+  'med_a:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'med_a:proprietati': { verdict:'na', reason:'N/A', rules:[] },
+  'med_a:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── BANCĂ ────
+  'banca:dosar_medical': { verdict:'deny', reason:'Băncile nu pot accesa date medicale.', rules:[{ type:'deny', text:'Domenii complet separate — sectorul financiar nu are acces la sănătate.' }] },
+  'banca:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut.', rules:[{ type:'deny', text:'Inre sekretess + domenii incompatibile.' }] },
+  'banca:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+  'banca:date_fiscale': { verdict:'conditional', reason:'Banca primește confirmare de venit de la ANAF pentru scoring credit, cu consimțământ cetățean.', scopes:['consimtamant_cetatean_eid','scope=confirmare_venit_scoring','fara_detalii_fiscale_complete'], rules:[{ type:'cond', text:'Cetățeanul acordă consimțământ explicit prin eID → ANAF confirmă categoria de venit.' }, { type:'deny', text:'Fără consimțământ, banca nu poate interoga ANAF direct.' }] },
+  'banca:date_identitate': { verdict:'permit', reason:'Banca verifică identitatea prin eID la onboarding (standard Open Banking).', rules:[{ type:'permit', text:'Autentificare prin eID → banca primește date de identitate de bază (KYC).' }] },
+  'banca:identitate_protejata': { verdict:'deny', reason:'Băncile nu accesează statutul de identitate protejată.', rules:[{ type:'deny', text:'Statutul de identitate protejată nu este comunicat instituțiilor financiare private.' }] },
+  'banca:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+  'banca:date_penale': { verdict:'conditional', reason:'Scoring credit poate include date penale — doar infracțiuni financiare, cu lege specială.', scopes:['lege_creditinfo','scope=infractiuni_financiare_only','consimtamant_cetatean'], rules:[{ type:'cond', text:'Legea creditului (1973:1173 swe echiv.) permite verificarea antecedentelor financiare limitat.' }] },
+  'banca:proprietati': { verdict:'permit', reason:'Cadastru furnizează date de proprietate pentru ipoteci (date publice registru).', rules:[{ type:'permit', text:'Datele de proprietate din Cadastru sunt publice — banca le accesează pentru evaluarea ipotecii.' }] },
+  'banca:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── AGENT ────
+  'agent:dosar_medical': { verdict:'conditional', reason:'Agenții automatizați nu accesează direct dosarul medical — intermediază doar evenimente.', scopes:['mandat_limitat','scope=eveniment_nastere_sau_deces','supervizor_uman','audit_complet'], rules:[{ type:'deny', text:'Agentul nu poate citi conținutul dosarului medical.' }, { type:'cond', text:'La naștere: agentul primește eveniment de la DEPABD → creează dosar nou prin API Dosar Medical (fără a citi conținut).' }, { type:'cond', text:'Fiecare acțiune al agentului este logată și supervizată de un funcționar uman desemnat.' }] },
+  'agent:jurnal_clinic': { verdict:'deny', reason:'Agenții nu accesează niciodată jurnalul clinic.', rules:[{ type:'deny', text:'Inre sekretess absolut. Agenții nu sunt profesioniști în sănătate.' }] },
+  'agent:date_fiscale': { verdict:'conditional', reason:'Agenții accesează date fiscale strict pentru calculul beneficiilor (alocație, bursă, pensie).', scopes:['scope=calcul_beneficiu_specific','log_actiune_agent','supervizor_uman'], rules:[{ type:'cond', text:'Agent Alocație: citește categoria de venit din ANAF pentru calculul cuantumului.' }, { type:'cond', text:'Agent Bursă: citește venitul familiei pentru eligibilitate bursă.' }, { type:'cond', text:'Agent Pensie: verifică contribuțiile CAS din ANAF pentru calculul pensiei.' }] },
+  'agent:date_identitate': { verdict:'permit', reason:'Agenții verifică identitățile implicate în fiecare tranzacție.', rules:[{ type:'permit', text:'DEPABD+ confirmă agenților identitatea și starea civilă pentru tranzacțiile orchestrate.' }] },
+  'agent:identitate_protejata': { verdict:'conditional', reason:'Agenții operează cu CNP — adresa protejată nu este expusă în fluxul agentului.', scopes:['rutare_prin_cnp','fara_adresa_in_payload'], rules:[{ type:'cond', text:'Agentul folosește CNP ca identificator unic — adresa protejată rămâne în DEPABD+ mascată.' }] },
+  'agent:stagiu_cotizare': { verdict:'conditional', reason:'Agent Pensie verifică stagiul în CNPP, cu mandat limitat la tipul de agent.', scopes:['scope=pensionare','mandat_cnpp_agent_pensie'], rules:[{ type:'cond', text:'Agent Pensionare primește token special de la CNPP pentru citirea stagiului de cotizare.' }] },
+  'agent:date_penale': { verdict:'deny', reason:'Agenții nu accesează niciodată registrul penal.', rules:[{ type:'deny', text:'Registrul penal este inaccesibil agenților automatizați.' }] },
+  'agent:proprietati': { verdict:'conditional', reason:'Agent Imobiliar verifică proprietatea în Cadastru, cu mandat de tranzacție.', scopes:['scope=tranzactie_imobiliara','token_tranzactie_imobiliara'], rules:[{ type:'cond', text:'Agent Imobiliar primește token de tranzacție cu acces la Cadastru pentru proprietatea specifică.' }] },
+  'agent:date_scolare': { verdict:'conditional', reason:'Agent Bursă citește mediile din RSN, strict pentru eligibilitate bursă.', scopes:['scope=medii_bursă','token_semestrial_rsn'], rules:[{ type:'cond', text:'Agent Bursă primește mediile semestriale din RSN cu token limitat per semestru.' }] },
+  'agent:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+
+  // ──── CADASTRU ────
+  'cadastru:dosar_medical': { verdict:'deny', reason:'Cadastrul nu accesează date medicale.', rules:[{ type:'deny', text:'Domenii incompatibile — proprietăți vs sănătate.' }] },
+  'cadastru:jurnal_clinic': { verdict:'deny', reason:'Interzis absolut.', rules:[{ type:'deny', text:'Inre sekretess.' }] },
+  'cadastru:certificat_concediu': { verdict:'na', reason:'N/A', rules:[] },
+  'cadastru:date_fiscale': { verdict:'conditional', reason:'Cadastrul notifică ANAF la transfer — nu accesează date fiscale ale persoanelor.', scopes:['push_event_transfer','scope=notificare_impozit'], rules:[{ type:'cond', text:'La transfer imobil: Cadastru emite eveniment → ANAF calculează taxe. Flux unidirecțional.' }] },
+  'cadastru:date_identitate': { verdict:'permit', reason:'DEPABD+ furnizează date identitate pentru înregistrarea proprietarilor.', rules:[{ type:'permit', text:'Cadastrul verifică CNP proprietar în DEPABD+ pentru înscrierea dreptului de proprietate.' }] },
+  'cadastru:identitate_protejata': { verdict:'conditional', reason:'Proprietățile persoanelor cu identitate protejată sunt înscrise pe CNP, fără adresa apărând în registrul public.', scopes:['cnp_ca_identificator','mascarea_adresei_in_extras_public'], rules:[{ type:'cond', text:'Extrasul public de carte funciară maschează adresa de contact a proprietarului cu identitate protejată.' }] },
+  'cadastru:stagiu_cotizare': { verdict:'na', reason:'N/A', rules:[] },
+  'cadastru:date_penale': { verdict:'na', reason:'N/A', rules:[] },
+  'cadastru:proprietati': { verdict:'permit', reason:'Proprietarul registrului imobiliar.', rules:[{ type:'permit', text:'Cadastrul este titularul registrului de proprietăți imobiliare.' }] },
+  'cadastru:date_scolare': { verdict:'na', reason:'N/A', rules:[] },
+};
+
+// ─────────────────────────────────────────────
+// MATRICE
+// ─────────────────────────────────────────────
+const MATRIX_INST = ['politie','anaf','cnas','cnpp','rsn','transport','depabd','banca','med_a','agent'];
+const MATRIX_RES  = ['dosar_medical','jurnal_clinic','date_fiscale','date_identitate','identitate_protejata','proprietati','date_penale','date_scolare'];
+const RES_SHORT   = {'dosar_medical':'Dosar','jurnal_clinic':'Jurnal','date_fiscale':'Fiscal','date_identitate':'ID','identitate_protejata':'ID Prot.','proprietati':'Imobil','date_penale':'Penal','date_scolare':'Şcolar'};
+const INST_SHORT  = {'politie':'POL','anaf':'ANAF','cnas':'CNAS','cnpp':'CNPP','rsn':'RSN','transport':'TRO','depabd':'DPB','banca':'BNK','med_a':'MED','agent':'AGT'};
+
+const VERDICT_ICON = { permit:'✓', deny:'✕', conditional:'◆', na:'·', indeterminate:'?' };
+const VERDICT_CHAR = { permit:'✓', deny:'✕', conditional:'◆', na:'·' };
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let selectedInst = null;
+let selectedRes  = null;
+let auditLog     = [];
+
+// ─────────────────────────────────────────────
+// RENDER INSTITUTION LIST
+// ─────────────────────────────────────────────
+function renderInstList() {
+  const el = document.getElementById('inst-list');
+  el.innerHTML = INSTITUTII.map(i => `
+    <div class="inst-item" id="inst-${i.id}" onclick="selectInst('${i.id}')">
+      <div class="inst-name">${i.name}</div>
+      <div class="inst-role">${i.role}</div>
+      <div class="inst-domain">${i.domain}</div>
+    </div>
+  `).join('');
+}
+
+function selectInst(id) {
+  if (selectedInst) document.getElementById(`inst-${selectedInst}`)?.classList.remove('active');
+  selectedInst = id;
+  document.getElementById(`inst-${id}`)?.classList.add('active');
+  evaluate();
+}
+
+// ─────────────────────────────────────────────
+// RENDER RESOURCE GRID
+// ─────────────────────────────────────────────
+function renderResGrid() {
+  const el = document.getElementById('res-grid');
+  el.innerHTML = RESURSE.map(r => `
+    <button class="res-btn" id="res-${r.id}" onclick="selectRes('${r.id}')">
+      <span class="res-name">${r.icon} ${r.name}</span>
+      <span class="res-owner">${r.owner}</span>
+    </button>
+  `).join('');
+}
+
+function selectRes(id) {
+  if (selectedRes) document.getElementById(`res-${selectedRes}`)?.classList.remove('active');
+  selectedRes = id;
+  document.getElementById(`res-${id}`)?.classList.add('active');
+  evaluate();
+}
+
+// ─────────────────────────────────────────────
+// EVALUATE PDP
+// ─────────────────────────────────────────────
+function evaluate() {
+  if (!selectedInst || !selectedRes) return;
+
+  const instData = INSTITUTII.find(i => i.id === selectedInst);
+  const resData  = RESURSE.find(r => r.id === selectedRes);
+  const key = `${selectedInst}:${selectedRes}`;
+  const policy = POLITICI[key];
+
+  if (!policy) {
+    renderDecision(instData, resData, { verdict:'na', reason:'Nicio politică definită explicit — acces nedefinit pe magistrală.', rules:[] });
+    return;
+  }
+
+  renderDecision(instData, resData, policy);
+  addAuditEntry(instData, resData, policy);
+}
+
+function renderDecision(inst, res, policy) {
+  const verdictLabels = { permit:'PERMIT', deny:'DENY', conditional:'CONDITIONAL', na:'NOT APPLICABLE', indeterminate:'INDETERMINATE' };
+  const verdictIcons  = { permit:'✓', deny:'✕', conditional:'◆', na:'·', indeterminate:'?' };
+
+  const flowHtml = `
+    <div class="flow">
+      <span class="flow-node caller">${inst.name}</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node pep">PEP</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node pdp">PDP</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node resource">${res.icon} ${res.name}</span>
+    </div>
+  `;
+
+  const verdictHtml = `
+    <div class="verdict ${policy.verdict}" id="verdict-box">
+      <div class="verdict-icon">${verdictIcons[policy.verdict]}</div>
+      <div class="verdict-text">
+        <div class="verdict-decision">${verdictLabels[policy.verdict]}</div>
+        <div class="verdict-reason">${policy.reason}</div>
+        ${policy.scopes?.length ? `<div class="scope-list">${policy.scopes.map(s=>`<span class="scope-badge">${s}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>
+  `;
+
+  const rulesHtml = policy.rules?.length ? `
+    <div class="rules-list">
+      ${policy.rules.map(r => `
+        <div class="rule-item r-${r.type}">
+          <span class="rule-tag">${r.type.toUpperCase()}</span>
+          <span class="rule-text">${r.text}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  document.getElementById('decision-body').innerHTML = flowHtml + verdictHtml + rulesHtml;
+
+  // animate verdict
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('verdict-box')?.classList.add('visible');
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────────
+function addAuditEntry(inst, res, policy) {
+  const ts = new Date();
+  const tsStr = ts.toTimeString().slice(0,8);
+  const hash = Math.random().toString(36).slice(2,10).toUpperCase();
+
+  auditLog.unshift({ inst, res, policy, ts: tsStr, hash });
+  if (auditLog.length > 20) auditLog.pop();
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const el = document.getElementById('audit-feed');
+  if (!auditLog.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-style:italic;font-size:12px;text-align:center;padding:20px 0;opacity:.5">Nicio cerere înregistrată</div>';
+    return;
+  }
+  const verdictLabel = { permit:'PERMIT', deny:'DENY', conditional:'CONDITIONAL', na:'N/A' };
+  el.innerHTML = auditLog.map(e => `
+    <div class="audit-entry a-${e.policy.verdict}">
+      <div class="audit-ts">${e.ts} · SHA: ${e.hash}</div>
+      <div class="audit-desc"><strong>${e.inst.name}</strong> → ${e.res.icon} ${e.res.name}</div>
+      <div class="audit-dec">${verdictLabel[e.policy.verdict] || 'N/A'}</div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────
+// MATRIX TABLE
+// ─────────────────────────────────────────────
+function renderMatrix() {
+  const tbl = document.getElementById('matrix-table');
+  const colHeader = `<tr><th class="row-header">↓ Caller / Resursa →</th>${MATRIX_RES.map(r=>`<th>${RES_SHORT[r]||r}</th>`).join('')}</tr>`;
+
+  const rows = MATRIX_INST.map(instId => {
+    const inst = INSTITUTII.find(i=>i.id===instId);
+    const cells = MATRIX_RES.map(resId => {
+      const key = `${instId}:${resId}`;
+      const p = POLITICI[key];
+      const v = p ? p.verdict : 'na';
+      const colors = { permit:'#4ade80', deny:'#f87171', conditional:'#fbbf24', na:'var(--muted)' };
+      return `<td style="color:${colors[v]};cursor:pointer" onclick="matrixClick('${instId}','${resId}')" title="${inst?.name} → ${RES_SHORT[resId]}"><span class="mc">${VERDICT_CHAR[v]||'·'}</span></td>`;
+    }).join('');
+    return `<tr><td class="row-name">${INST_SHORT[instId]||instId}</td>${cells}</tr>`;
+  }).join('');
+
+  tbl.innerHTML = colHeader + rows;
+}
+
+function matrixClick(instId, resId) {
+  selectInst(instId);
+  selectRes(resId);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+renderInstList();
+renderResGrid();
+renderMatrix();
+</script>
+</body>
+</html>
