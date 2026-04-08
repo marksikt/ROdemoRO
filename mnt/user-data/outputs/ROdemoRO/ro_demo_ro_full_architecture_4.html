@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROdemoRO — Arhitectură completă</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f3ef;color:#1c1c1a;padding:16px}
+@media(prefers-color-scheme:dark){body{background:#171715;color:#e6e4de}}
+
+.ll{font-size:10px;font-weight:500;color:#6b6963;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;margin-top:11px}
+.row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:2px}
+.nd{border-radius:9px;padding:7px 11px;cursor:pointer;transition:transform .13s;min-width:90px;text-align:center;border-width:1.5px;border-style:solid}
+.nd:hover{transform:translateY(-2px)}
+.nd.sel{outline:2.5px solid #1c1c1a;outline-offset:2px;transform:translateY(-2px)}
+.nt{font-size:12px;font-weight:500;line-height:1.3}
+.ns{font-size:10px;margin-top:2px;opacity:.8;line-height:1.3}
+.infra{background:#EEEDFE;border-color:#7F77DD;color:#26215C}
+.agent{background:#FBEAF0;border-color:#D4537E;color:#4B1528}
+.transport{background:#FAEEDA;border-color:#BA7517;color:#412402}
+.fiscal{background:#EAF3DE;border-color:#639922;color:#173404}
+.reg{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+.police{background:#E6F1FB;border-color:#185FA5;color:#042C53;border-style:dashed}
+.det{border-radius:11px;background:#f9f8f5;border:1px solid #e2e0da;padding:13px 15px;margin-top:10px;min-height:58px}
+.det h3{font-size:14px;font-weight:500;margin-bottom:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.det p{font-size:12px;color:#6b6963;line-height:1.6;margin-bottom:3px}
+.bdg{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;border:1px solid}
+.apis{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.api{font-size:10px;background:#fff;border:1px solid #e2e0da;border-radius:5px;padding:2px 6px;font-family:monospace;color:#6b6963}
+.se{font-size:11px;color:#9a9890;font-style:italic;margin-top:3px}
+.conn{font-size:11px;color:#9a9890;margin-bottom:3px}
+.bus{background:#f9f8f5;border:1.5px solid #e2e0da;border-radius:10px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}
+.bus-line{flex:1;height:2px;background:repeating-linear-gradient(90deg,#e2e0da 0,#e2e0da 5px,transparent 5px,transparent 10px)}
+.bus-lbl{font-size:11px;font-weight:500;color:#6b6963;white-space:nowrap}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1D9E75;animation:p 2s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+@media(prefers-color-scheme:dark){
+.infra{background:#26215C;border-color:#AFA9EC;color:#CECBF6}
+.agent{background:#4B1528;border-color:#ED93B1;color:#F4C0D1}
+.transport{background:#412402;border-color:#EF9F27;color:#FAC775}
+.fiscal{background:#173404;border-color:#97C459;color:#C0DD97}
+.reg{background:#04342C;border-color:#5DCAA5;color:#9FE1CB}
+.police{background:#042C53;border-color:#85B7EB;color:#B5D4F4}
+.det{background:#1f1f1d;border-color:#2e2e2b}
+.api{background:#252523;border-color:#2e2e2b;color:#8a8880}
+.bus{background:#1f1f1d;border-color:#2e2e2b}
+}
+</style>
+</head>
+<body>
+
+<div style="margin-bottom:14px">
+  <div style="font-size:18px;font-weight:500;margin-bottom:3px">ROdemoRO — Arhitectură completă</div>
+  <div style="font-size:12px;color:#6b6963">Un stat român simulat · funcțional · vizitabil · testabil</div>
+</div>
+
+<div class="ll">🔐 Infrastructură digitală — eID + Cutie poștală</div>
+<div class="row">
+  <div class="nd infra" onclick="sel(this,'eid')"><div class="nt">eID RO</div><div class="ns">BankID european</div></div>
+  <div class="nd infra" onclick="sel(this,'kivra')"><div class="nt">Kivra RO</div><div class="ns">Cutie poștală digitală</div></div>
+</div>
+
+<div class="ll">🌐 Acces cetățeni & dezvoltatori</div>
+<div class="row">
+  <div class="nd" style="background:#E6F1FB;border-color:#378ADD;color:#042C53" onclick="sel(this,'pct')"><div class="nt">Portal Cetățean</div><div class="ns">my.ro.demo.ro</div></div>
+  <div class="nd" style="background:#E6F1FB;border-color:#378ADD;color:#042C53" onclick="sel(this,'apigw')"><div class="nt">API Gateway</div><div class="ns">api.ro.demo.ro</div></div>
+  <div class="nd" style="background:#E6F1FB;border-color:#378ADD;color:#042C53" onclick="sel(this,'demozone')"><div class="nt">Demo Zone</div><div class="ns">scenarii ghidate</div></div>
+  <div class="nd infra" onclick="sel(this,'nucleu')" style="border-color:#534AB7"><div class="nt">NUCLEU ★</div><div class="ns">AI onboarding</div></div>
+</div>
+
+<div class="bus">
+  <div class="bus-line"></div>
+  <div class="bus-lbl"><span class="dot"></span>&nbsp;Magistrală X-Road RO&nbsp;<span class="dot"></span></div>
+  <div class="bus-line"></div>
+</div>
+
+<div class="ll">📋 Registre de bază — sursa de adevăr</div>
+<div class="row">
+  <div class="nd reg" onclick="sel(this,'depabd')"><div class="nt">DEPABD+</div><div class="ns">Populație + Stare Civilă</div></div>
+  <div class="nd police" onclick="sel(this,'politie')"><div class="nt">Poliție</div><div class="ns">CI + Pașaport</div></div>
+  <div class="nd reg" onclick="sel(this,'cadastru')"><div class="nt">Cadastru</div><div class="ns">Imobile · W3W</div></div>
+  <div class="nd reg" onclick="sel(this,'onrc')"><div class="nt">RCO</div><div class="ns">Registrul organizațiilor</div></div>
+  <div class="nd reg" onclick="sel(this,'rap')"><div class="nt">RAP</div><div class="ns">Asociații proprietari</div></div>
+  <div class="nd reg" onclick="sel(this,'rsn')"><div class="nt">RSN</div><div class="ns">Registrul Școlar</div></div>
+</div>
+
+<div class="ll">⚙️ Servicii specializate</div>
+<div class="row">
+  <div class="nd fiscal" onclick="sel(this,'anaf')"><div class="nt">ANAF ✓</div><div class="ns">Fiscal · DemoANAF</div></div>
+  <div class="nd transport" onclick="sel(this,'transport')"><div class="nt">Transport RO</div><div class="ns">Permis · Registru Auto</div></div>
+  <div class="nd" style="background:#FAECE7;border-color:#D85A30;color:#4A1B0C" onclick="sel(this,'med')"><div class="nt">Dosar Medical</div><div class="ns">Național · e-Rețetă</div></div>
+  <div class="nd" style="background:#FAECE7;border-color:#D85A30;color:#4A1B0C" onclick="sel(this,'farmacie')"><div class="nt">Farmacii</div><div class="ns">Rețetă instantanee</div></div>
+  <div class="nd fiscal" onclick="sel(this,'cnas')"><div class="nt">CNAS</div><div class="ns">Sănătate · Asigurări</div></div>
+  <div class="nd fiscal" onclick="sel(this,'cnpp')"><div class="nt">CNPP</div><div class="ns">Pensii publice</div></div>
+  <div class="nd reg" onclick="sel(this,'bankgiro')"><div class="nt">BankGiro RO</div><div class="ns">Rutare plăți prin CNP</div></div>
+  <div class="nd reg" onclick="sel(this,'cnt')"><div class="nt">CNT</div><div class="ns">Card Național Transport</div></div>
+</div>
+
+<div class="ll">🤖 Agenți automatizați — rutine supervizate de funcționari</div>
+<div class="row">
+  <div class="nd agent" onclick="sel(this,'ag-imob')"><div class="nt">Agent Imobiliar</div><div class="ns">Vânzare · Cadastru · Bănci</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-auto')"><div class="nt">Agent Auto</div><div class="ns">Vânzare · Registru Auto</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-casatorie')"><div class="nt">Agent Căsătorie</div><div class="ns">Stare Civilă · DEPABD</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-divort')"><div class="nt">Agent Divorț</div><div class="ns">Instanțe · Stare Civilă</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-pensie')"><div class="nt">Agent Pensionare</div><div class="ns">CNPP · CNAS · ANAF</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-alocatie')"><div class="nt">Agent Alocație</div><div class="ns">Naștere → plată auto</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-bursa')"><div class="nt">Agent Bursă</div><div class="ns">RSN · ANAF · BankGiro</div></div>
+  <div class="nd agent" onclick="sel(this,'ag-special')"><div class="nt">Agent Special</div><div class="ns">Creat ad-hoc · 2 cetățeni</div></div>
+</div>
+
+<div class="ll">🏦 Instituții financiare externe</div>
+<div class="row">
+  <div class="nd" style="background:#F1EFE8;border-color:#5F5E5A;color:#2C2C2A" onclick="sel(this,'banca')"><div class="nt">Bănci RO</div><div class="ns">Plăți · Ipoteci · Agenți</div></div>
+</div>
+
+<div id="det" class="det" style="opacity:.4"><p style="text-align:center;font-size:12px">Apasă pe orice instituție sau agent pentru detalii</p></div>
+
+<div style="margin-top:14px;font-size:10px;color:#9a9890;text-align:center">
+  ROdemoRO · <a href="https://github.com/marksikt/ROdemoRO" style="color:#1D9E75">github.com/marksikt/ROdemoRO</a> · Inspirat din sistemul public suedez (Skatteverket, BankID, Kivra, Lantmäteriet)
+</div>
+
+<script>
+const D={
+  eid:{t:'eID RO — Identitate Digitală Națională',cls:'infra',bdg:'Infrastructură',desc:'BankID-ul românesc, interoperabil cu eIDAS european. Singura metodă de autentificare în tot ecosistemul. Nu stochează adresă — adresa e în DEPABD. Valabil pentru servicii publice și private.',conn:'Folosit de: toate instituțiile · validat prin: DEPABD CNP',se:'🇸🇪 BankID suedez — 8.5M utilizatori, autentifică de la taxe la Netflix',apis:['POST /auth/eid','GET /identity/{cnp}','POST /sign/document','GET /session/validate']},
+  kivra:{t:'Kivra RO — Cutie Poștală Digitală',cls:'infra',bdg:'Infrastructură',desc:'Orice act oficial ajunge în Kivra. Notificări automate: CI expiră în 60 zile → alertă. Permis expiră → alertă. Scrisori ANAF, extrase Cadastru, rețete medicale, decizii pensie — toate într-un singur loc.',conn:'Primește de la: DEPABD, Poliție, Transport RO, ANAF, Dosar Medical, Cadastru',se:'🇸🇪 Kivra.se — 5M utilizatori, elimină 500M scrisori fizice/an',apis:['POST /message/send','GET /inbox/{cnp}','GET /notifications/{cnp}','POST /alerta-expirare']},
+  nucleu:{t:'NUCLEU ★ — Instituție Unificată cu AI',cls:'infra',bdg:'Prioritate maximă',desc:'Reunește sub un singur acoperiș: Evidența Persoanelor · Fiscalitate · Cadastru · Registrul Auto · Educație · Sănătate. Onboarding prin dialog AI — funcționarul virtual înregistrează cetățenii prin conversație naturală. Spui CNP-ul vechi și primești CNP RO.DEMO.RO.',conn:'Orchestrează: toate registrele și serviciile · AI: Claude (Anthropic API)',se:'🇸🇪 Skatteverket — fiscalitate + Folkbokföring sub un singur acoperiș',apis:['POST /api/chat (AI)','GET /api/profil/{cnp}','POST /api/nastere','POST /api/casatorie','POST /api/angajare','POST /api/pensionare']},
+  depabd:{t:'DEPABD+ — Evidența Populației & Stare Civilă',cls:'reg',bdg:'Registru de bază',desc:'Sursa de adevăr pentru orice persoană fizică. CNP → identitate completă, relații familiale, stare civilă, fastighetsbeteckning (adresă W3W). Naștere → actualizează automat dosarul medical și CNAS. Deces → dezactivează eID, notifică ANAF și CNPP. Niciun act nu conține adresă.',conn:'Sursă pentru: Poliție, Cadastru, Transport, Dosar Medical, CNPP, toți agenții',se:'🇸🇪 Folkbokföring (Skatteverket) — backbone-ul statului suedez din 1991',apis:['GET /persoana/{cnp}','GET /adresa/{cnp}','POST /nastere','POST /deces','POST /casatorie']},
+  politie:{t:'Poliție — CI Națională & Pașapoarte',cls:'police',bdg:'Documente identitate',desc:'Emite Cartea de Identitate și Pașaportul. Niciun act nu conține adresă — adresa e în DEPABD. Permisul de conducere are valoare egală ca act de identitate. Kivra trimite alertă la 60 zile înainte de expirare.',conn:'Citește din: DEPABD · Scrie în: Kivra (notificări expirare)',se:'🇸🇪 Polisen — CI fără adresă, reînnoire online, livrare acasă',apis:['GET /ci/{cnp}','POST /emitere-ci','GET /pasaport/{cnp}','POST /reinnoire']},
+  cadastru:{t:'Cadastru — Registrul Proprietăților',cls:'reg',bdg:'Registru de bază',desc:'Fiecare imobil are identificator primar: fastighetsbeteckning (3 cuvinte W3W). La vânzare, agentul imobiliar declanșează transferul atomic: banca → Cadastru → DEPABD (adresă nouă). Zero formulare manuale.',conn:'↔ DEPABD (CNP proprietar), Bănci (ipoteci), Agent Imobiliar, RAP',se:'🇸🇪 Lantmäteriet — transfer proprietate în 1-3 zile, totul digital',apis:['GET /imobil/{w3w}','GET /proprietati/{cnp}','POST /transfer','POST /sechestru']},
+  onrc:{t:'RCO — Registrul Comun al Organizațiilor',cls:'reg',bdg:'Registru unificat',desc:'Un singur registru pentru: SRL, SA, PFA, ONG, asociații, instituții publice. Format ID identic cu CNP persoane fizice — același câmp în orice bază de date. Prefixul primei cifre encodează tipul (model suedez organisationsnummer).',conn:'↔ ANAF (obligații fiscale), DEPABD (asociați), BankGiro (conturi firmă)',se:'🇸🇪 Bolagsverket + Skatteverket — un singur număr pentru toate scopurile',apis:['GET /organizatie/{id}','POST /inregistrare','GET /tip/{prefix}','GET /search?q=']},
+  rap:{t:'RAP — Registrul Asociațiilor de Proprietari',cls:'reg',bdg:'Registru',desc:'La cumpărarea unui apartament, agentul imobiliar notifică RAP automat. Noul proprietar primește invitație în Kivra pentru înscrierea în asociație. Cotizațiile lunare se trimit în Kivra cu buton BankGiro precompletat.',conn:'↔ Cadastru (proprietar apartament), DEPABD (locatari), BankGiro (cotizații)',se:'🇸🇪 Bostadsrättsföreningar — registru național, legate de Lantmäteriet',apis:['GET /asociatie/{id}','GET /condominiu/{id}','POST /inscriere','GET /restante/{id}']},
+  rsn:{t:'RSN — Registrul Școlar Național',cls:'reg',bdg:'Registru',desc:'Fiecare elev/student legat prin CNP. Istoricul complet: unitate școlară, note, medii, absențe. La transfer, dosarul migrează automat. Diploma digitală verificabilă de orice angajator fără apostilă. Admiterea prin algoritm Gale-Shapley.',conn:'↔ DEPABD (CNP), Agent Bursă (medii), Admitere (scoruri)',se:'🇸🇪 Skolverket + Ladok — registru național, ECTS digital',apis:['GET /elev/{cnp}/istoric','GET /diploma/verifica/{hash}','POST /adm-uni/dosar']},
+  anaf:{t:'ANAF — Agenția Fiscală (DemoANAF ✓)',cls:'fiscal',bdg:'Existent · prioritate maximă',desc:'Baza de pornire. DemoANAF al lui Daniel Tamas există deja. Preluăm API-urile și le conectăm la magistrala comună. Calculează CAS, CASS, impozit. Cel mai performant ANAF din lume e cel suedez — Skatteverket.',conn:'↔ DEPABD, RCO, CNPP (contribuții), CNAS, toți agenții (plăți)',se:'🇸🇪 Skatteverket — 98% declarații digitale, API public, zero hârtie',apis:['GET /contribuabil/{cif}','POST /declaratieD112','GET /obligatii/{cnp}','GET /venituri/{cnp}']},
+  transport:{t:'Transport RO — Permise & Registru Auto',cls:'transport',bdg:'Registru + documente',desc:'Emite permisul de conducere — act de identitate fără adresă. Plăcuță format YYYYMMDD-LLL (fără județ). La vânzare auto, agentul transferă proprietatea în registru — placa rămâne pe vehicul. Kivra alertează la expirarea permisului.',conn:'↔ DEPABD (CNP), Poliție (date identitate), Kivra (notificări), Agent Auto',se:'🇸🇪 Transportstyrelsen — permis fără adresă, registru auto public',apis:['GET /permis/{cnp}','GET /vehicule/{cnp}','POST /transfer-auto','POST /reinnoire-permis']},
+  med:{t:'Dosar Medical Național',cls:'fiscal',bdg:'Serviciu critic',desc:'Un singur dosar medical pe CNP. Medic prescrie → rețeta vizibilă instant în orice farmacie. Naștere → dosar nou creat automat. Deces → dosar închis. Urgențe: acces fără consimțământ cu audit complet.',conn:'↔ DEPABD (nașteri/decese), Farmacii (rețete), CNAS (decontare)',se:'🇸🇪 1177 Vårdguiden + Pascal — dosar unic, rețetă din 2001',apis:['GET /dosar/{cnp}','POST /consultatie','POST /reteta/{cnp}','GET /alergii/{cnp}']},
+  farmacie:{t:'Farmacii — Rețetă Electronică',cls:'fiscal',bdg:'Serviciu',desc:'Farmacia nu primește hârtie — vede rețeta direct din Dosarul Medical. Decontare automată cu CNAS. Compensare calculată automat (90% pentru boli cronice). Stoc critic → alertă DSP.',conn:'↔ Dosar Medical (rețete), CNAS (decontare), eID (autentificare pacient)',se:'🇸🇪 Apoteket — rețetă electronică, pick up în orice farmacie',apis:['GET /retete-active/{cnp}','POST /eliberare/{id}','GET /decontare/{cnp}']},
+  cnas:{t:'CNAS — Casa Națională de Sănătate',cls:'fiscal',bdg:'Serviciu',desc:'Asigurare medicală, concedii, maternitate. La naștere: activare automată asigurare. La angajare: actualizare contribuții. La pensionare: asigurare pensionar. Concediu medical aprobat automat sub 3 zile.',conn:'↔ ANAF (contribuții), Dosar Medical, Farmacii (decontare), DEPABD',se:'🇸🇪 Försäkringskassan — concedii, maternitate — 100% digital',apis:['GET /asigurare/{cnp}','POST /concediu-medical','GET /decontari/{cnp}']},
+  cnpp:{t:'CNPP — Casa Pensiilor Publice',cls:'fiscal',bdg:'Serviciu',desc:'Stagiu de cotizare actualizat lunar din ANAF. Simulare pensie estimativă în timp real. Agentul de pensionare orchestrează retragerea complet.',conn:'↔ ANAF (contribuții lunare), DEPABD, Agent Pensionare',se:'🇸🇪 Pensionsmyndigheten — simulator pensie live, extras anual automat',apis:['GET /stagiu/{cnp}','GET /pensie-estimativa/{cnp}','POST /activare-pensie']},
+  bankgiro:{t:'BankGiro RO — Rutare Plăți prin CNP',cls:'reg',bdg:'Infrastructură plăți',desc:'Plătitorul nu știe și nu trebuie să știe la ce bancă e destinatarul. BankGiro = CNP → număr permanent. La schimbare bancă, BankGiro-ul rămâne. Toate plățile de beneficii (alocații, pensii, șomaj) merg prin BankGiro.',conn:'Conectat la: toate instituțiile și agenții · Rutează prin: Bănci RO',se:'🇸🇪 Bankgirot — funcționează din 1959, 99% din plățile B2B și G2C',apis:['POST /plata','POST /plata-recurenta','GET /extras/{cnp}','GET /cont/{cnp}']},
+  cnt:{t:'Cardul Național de Transport (CNT)',cls:'reg',bdg:'Serviciu',desc:'Un card pentru toate rețelele: urban, regional, CFR, autocar. Abonamentul social (pensionar gratuit, student -50%, dizabilitate gratuit național) activat automat de agenți. Validare offline, sincronizare nocturnă.',conn:'↔ DEPABD (CNP), CNAS (dizabilitate), RSN (student), CNPP (pensionar)',se:'🇸🇪 Reskassa + SL — un card, toate companiile, subvenții automate',apis:['GET /abonament/{cnp}','POST /validare','GET /beneficii/{cnp}']},
+  'ag-imob':{t:'Agent Imobiliar — Tranzacție Atomică',cls:'agent',bdg:'Agent automatizat',desc:'5 pași atomici: (1) verificare identități DEPABD, (2) verificare proprietate Cadastru, (3) blocare sumă BankGiro, (4) transfer Cadastru, (5) actualizare adresă DEPABD. Ori totul, ori nimic. Funcționarul validează la final.',conn:'Orchestrează: Cadastru · DEPABD · Banca cumpărător · Banca vânzător · ANAF · Kivra',se:'🇸🇪 Lantmäteriet e-ansökan — transfer imobil în 1-3 zile',apis:['POST /agent/imob/start','GET /tranzactie/{id}/status','POST /tranzactie/{id}/validare']},
+  'ag-auto':{t:'Agent Auto — Vânzare Vehicul',cls:'agent',bdg:'Agent automatizat',desc:'Transfer vehicul între doi cetățeni: verifică proprietar în Registrul Auto, transferă fiscal prin ANAF (taxă 0.5%), actualizează Registrul Auto cu noul proprietar prin CNP. Fără drumuri la Poliție. Placa rămâne pe mașină.',conn:'Orchestrează: Transport RO · DEPABD · ANAF · Bănci · Kivra',se:'🇸🇪 Transportstyrelsen ägarskifte — transfer auto online în 10 minute',apis:['POST /agent/auto/start','PUT /proprietar/{placa}','POST /taxa-transfer']},
+  'ag-casatorie':{t:'Agent Căsătorie',cls:'agent',bdg:'Agent automatizat',desc:'Verifică starea civilă actuală, programează ceremonia, actualizează DEPABD, notifică ANAF, trimite certificat digital în Kivra ambilor cetățeni. Opțional: adresă comună.',conn:'Orchestrează: DEPABD · Stare Civilă · ANAF · Kivra',se:'🇸🇪 Skatteverket — căsătorie actualizează 8 registre automat',apis:['POST /agent/casatorie/start','POST /confirmare-ceremonie','PUT /actualizare-depabd']},
+  'ag-divort':{t:'Agent Divorț',cls:'agent',bdg:'Agent automatizat',desc:'Gestionează separarea: actualizează starea civilă, redistribuie proprietăți din Cadastru, actualizează dosarele medicale ale copiilor, recalculează drepturile fiscale. Instanțele implicate dacă sunt bunuri comune sau copii.',conn:'Orchestrează: DEPABD · Instanțe · Cadastru · ANAF · CNPP · Dosar Medical',se:'🇸🇪 Divorț simplificat prin Skatteverket dacă fără bunuri comune',apis:['POST /agent/divort/start','GET /bunuri-comune/{cnp_pereche}','POST /acord-partaj']},
+  'ag-pensie':{t:'Agent Pensionare — 8 pași',cls:'agent',bdg:'Agent automatizat',desc:'(1) stagiu CNPP, (2) calcul pensie, (3) verificare ANAF, (4) activare pensie, (5) BankGiro plată lunară, (6) status fiscal ANAF, (7) CNAS asigurare pensionar, (8) decizie în Kivra. 15 minute vs 3 luni actual.',conn:'Orchestrează: CNPP · ANAF · CNAS · DEPABD · BankGiro · Kivra',se:'🇸🇪 Pensionsmyndigheten — cerere pensionare online 15 minute',apis:['POST /agent/pensie/start','GET /eligibilitate/{cnp}','POST /activare-pensie']},
+  'ag-alocatie':{t:'Agent Alocație Copil',cls:'agent',bdg:'Agent automatizat',desc:'Declanșat automat la naștere (eveniment DEPABD). Verifică venitul custodelui din ANAF, calculează cuantumul (400-800 lei în funcție de venit), programează plata lunară BankGiro, notifică Kivra. Zero formulare.',conn:'Declanșat de: DEPABD (nastere) · Verifică: ANAF · Plătește: BankGiro · Notifică: Kivra',se:'🇸🇪 Barnbidrag — 1.250 SEK/lună automat de la naștere',apis:['POST /ag-alocatie/start/{cnp_copil}','POST /plata-lunara','PUT /oprire-majorat']},
+  'ag-bursa':{t:'Agent Bursă — Automat per Semestru',cls:'agent',bdg:'Agent automatizat',desc:'La fiecare final de semestru: citește mediile din RSN, verifică venitul familiei în ANAF, aplică grila de bursă, emite ordinul BankGiro. Studentul găsește bursa în cont fără să fi depus nicio cerere.',conn:'Citește: RSN (medii) · Verifică: ANAF (venituri) · Plătește: BankGiro · Notifică: Kivra',se:'🇸🇪 CSN — bursă calculată automat, fără cerere manuală',apis:['POST /ag-bursa/calcul-semestru','GET /bursa-activa/{cnp}','PUT /suspendare-bursa']},
+  'ag-special':{t:'Agent Special — Ad-hoc între Cetățeni',cls:'agent',bdg:'Agent creat la cerere',desc:'Oricând doi cetățeni au o treabă specifică împreună (moștenire, tutelă, contract de întreținere, recunoaștere paternitate), se creează un agent special cu durată limitată. Log complet pentru audit. Funcționarul validează punctele cheie.',conn:'Orchestrează: dinamic · Supervizat de: funcționar desemnat · Audit: complet',se:'🇸🇪 "en väg in" — o singură intrare pentru orice eveniment complex',apis:['POST /agent/special/create','PUT /agent/{id}/pas/{n}/validare','GET /agent/{id}/audit-log']},
+  banca:{t:'Bănci RO — Instituții Financiare',cls:'fiscal',bdg:'Entitate externă',desc:'Băncile se conectează la magistrală prin API standardizat (Open Banking RO simulat). La tranzacții imobiliare: escrow atomic. La plăți beneficii: primesc ordinele BankGiro și execută. Autentificare prin eID.',conn:'↔ Agent Imobiliar, Agent Auto, ANAF (raportare), eID (autentificare)',se:'🇸🇪 Open Banking + BankID — autentificare și plată în același flow',apis:['POST /plata/initiere','GET /cont/disponibil','POST /escrow/blocare','POST /escrow/eliberare']},
+  pct:{t:'Portal Cetățean',cls:'portal',bdg:'Interfață',desc:'Punct unic de acces. Un CNP de test deblochează întreaga viață administrativă: taxe, documente, dosare, proprietăți, sănătate. Autentificare prin eID RO.',conn:'Conectat la: toate instituțiile prin magistrală',se:'🇸🇪 Mina sidor pe Skatteverket',apis:['GET /cetatean/{cnp}/dashboard','GET /documente/{cnp}','GET /notificari/{cnp}']},
+  apigw:{t:'API Gateway — Developer Portal',cls:'portal',bdg:'Interfață tehnică',desc:'Swagger + sandbox complet. Orice firmă IT poate testa integrări cu statul fără date reale. Tokens OAuth2 sandbox, Postman collections descărcabile.',conn:'Expune: toate API-urile instituțiilor prin standard comun',se:'🇸🇪 Verksamt.se + Bolagsverket Open API',apis:['OpenAPI 3.0','OAuth2 sandbox','Rate-limited tokens']},
+  demozone:{t:'Demo Zone — Scenarii Ghidate',cls:'portal',bdg:'Comercial · Cheie',desc:'Scenarii interactive complete: "Cumpără un apartament", "Pensionează-te", "Înregistrează o firmă". Fiecare scenariu trece prin agenți reali, vizibil pas cu pas.',conn:'Folosește: toți agenții + toate instituțiile',se:'🇸🇪 verksamt.se — pornire firmă simulată live, pas cu pas',apis:['scenarii ghidate','date fictive realiste','export PDF']},
+};
+
+const colors={infra:'#7F77DD',portal:'#378ADD',reg:'#1D9E75',fiscal:'#639922',transport:'#BA7517',health:'#D85A30',agent:'#D4537E',bank:'#888780',police:'#185FA5'};
+const bgs={infra:'#EEEDFE',portal:'#E6F1FB',reg:'#E1F5EE',fiscal:'#EAF3DE',transport:'#FAEEDA',health:'#FAECE7',agent:'#FBEAF0',bank:'#F1EFE8',police:'#E6F1FB'};
+
+let cur=null;
+function sel(el,key){
+  if(cur)cur.classList.remove('sel');
+  el.classList.add('sel');cur=el;
+  const d=D[key];if(!d)return;
+  const c=colors[d.cls]||'#1D9E75',b=bgs[d.cls]||'#E1F5EE';
+  document.getElementById('det').style.opacity='1';
+  document.getElementById('det').innerHTML=`
+    <h3>${d.t}<span class="bdg" style="background:${b};border-color:${c};color:${c};margin-left:6px">${d.bdg}</span></h3>
+    <p>${d.desc}</p>
+    <p class="conn">⟷ ${d.conn}</p>
+    <p class="se">${d.se}</p>
+    <div class="apis">${d.apis.map(a=>`<span class="api">${a}</span>`).join('')}</div>`;
+}
+</script>
+</body>
+</html>
